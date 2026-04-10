@@ -167,6 +167,7 @@ export default function HeritageMap({
   boundary,
   boroughBoundaries,
   activeBorough,
+  routeStationMarkers,
   selectedFeature,
   selectedSiteContext,
   siteContextById,
@@ -181,6 +182,7 @@ export default function HeritageMap({
   const lineRef = useRef(null);
   const boundaryRef = useRef(null);
   const boroughRef = useRef(null);
+  const routeStationRef = useRef(null);
   const accessRingRef = useRef(null);
   const contextLayerRef = useRef(null);
   const markerByIdRef = useRef({});
@@ -246,6 +248,13 @@ export default function HeritageMap({
     if (contextLayerRef.current) {
       map.removeLayer(contextLayerRef.current);
       contextLayerRef.current = null;
+    }
+  }
+
+  function clearRouteStations(map) {
+    if (routeStationRef.current) {
+      map.removeLayer(routeStationRef.current);
+      routeStationRef.current = null;
     }
   }
 
@@ -426,6 +435,7 @@ export default function HeritageMap({
       map.removeLayer(lineRef.current);
       lineRef.current = null;
     }
+    clearRouteStations(map);
     clearAccessRing(map);
     clearContextLayers(map);
 
@@ -475,11 +485,36 @@ export default function HeritageMap({
         opacity: 0.65,
         dashArray: '8 8'
       }).addTo(map);
+
+      if (routeStationMarkers?.length) {
+        const stationLayer = L.layerGroup();
+        for (const station of routeStationMarkers) {
+          const marker = L.marker([station.lat, station.lon], {
+            icon: L.divIcon({
+              className: '',
+              html: '<span class="route-station-marker"></span>',
+              iconSize: [16, 16],
+              iconAnchor: [8, 8]
+            }),
+            zIndexOffset: 240
+          }).bindTooltip(
+            `${station.name} · ${station.count} nearby stops${station.lines.length ? ` · ${station.lines.join(', ')}` : ''}`,
+            {
+              direction: 'top',
+              offset: [0, -8]
+            }
+          );
+          stationLayer.addLayer(marker);
+        }
+        stationLayer.addTo(map);
+        routeStationRef.current = stationLayer;
+      }
+
       map.fitBounds(lineRef.current.getBounds(), { padding: [40, 40] });
     } else {
       map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 13 });
     }
-  }, [activeBorough, boroughBoundaries, boundary, features, onFeatureSelect, route, routeDefs]);
+  }, [activeBorough, boroughBoundaries, boundary, features, onFeatureSelect, route, routeDefs, routeStationMarkers]);
 
   useEffect(() => {
     const map = mapRef.current;

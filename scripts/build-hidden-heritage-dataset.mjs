@@ -866,6 +866,8 @@ out geom tags;
       opening_info:
         'Blue plaque visible from the street. Building access varies and should be checked separately.',
       nearest_station: nearest?.station.name || null,
+      nearest_station_lat: nearest?.station.lat ?? null,
+      nearest_station_lon: nearest?.station.lon ?? null,
       station_distance_m: stationDistanceM,
       station_lines: stationLines,
       station_modes: nearest?.station.modes || [],

@@ -60,6 +60,84 @@ function aggregateCounts(features, keyGetter) {
     .sort((a, b) => (b.count - a.count) || a.key.localeCompare(b.key));
 }
 
+function aggregateRouteStations(features) {
+  const byStation = new Map();
+
+  for (const feature of features) {
+    const props = feature.properties;
+    if (!props.nearest_station || props.nearest_station_lat == null || props.nearest_station_lon == null) continue;
+
+    const current = byStation.get(props.nearest_station) || {
+      name: props.nearest_station,
+      lat: props.nearest_station_lat,
+      lon: props.nearest_station_lon,
+      count: 0,
+      lines: new Set()
+    };
+
+    current.count += 1;
+    for (const line of props.station_lines || []) {
+      current.lines.add(line);
+    }
+    byStation.set(props.nearest_station, current);
+  }
+
+  return [...byStation.values()]
+    .map(item => ({
+      name: item.name,
+      lat: item.lat,
+      lon: item.lon,
+      count: item.count,
+      lines: [...item.lines]
+    }))
+    .sort((a, b) => (b.count - a.count) || a.name.localeCompare(b.name))
+    .slice(0, 6);
+}
+
+function orderedFeatures(features) {
+  if (features.length <= 2) return features;
+
+  const pool = [...features];
+  const ordered = [pool.shift()];
+
+  while (pool.length) {
+    const last = ordered.at(-1);
+    const [lastLon, lastLat] = last.geometry.coordinates;
+    let nearestIndex = 0;
+    let nearestDistance = Infinity;
+
+    pool.forEach((candidate, index) => {
+      const [lon, lat] = candidate.geometry.coordinates;
+      const distance = (lat - lastLat) ** 2 + (lon - lastLon) ** 2;
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = index;
+      }
+    });
+
+    ordered.push(pool.splice(nearestIndex, 1)[0]);
+  }
+
+  return ordered;
+}
+
+function pickRouteStops(features, limit) {
+  if (features.length <= limit) return orderedFeatures(features);
+
+  const ordered = orderedFeatures(features);
+  const picks = [];
+
+  for (let index = 0; index < limit; index += 1) {
+    const position = Math.round((index * (ordered.length - 1)) / Math.max(limit - 1, 1));
+    const candidate = ordered[position];
+    if (candidate && !picks.includes(candidate)) {
+      picks.push(candidate);
+    }
+  }
+
+  return picks;
+}
+
 function normalizeBoroughName(name = '') {
   return name
     .replace(/^London Borough of /i, '')
@@ -97,6 +175,7 @@ export default function App() {
     water: false,
     roads: false
   });
+  const [routeStopLimit, setRouteStopLimit] = useState(4);
   const mapApiRef = useRef(null);
 
   const handleFeatureSelect = useCallback(id => {
@@ -177,8 +256,10 @@ export default function App() {
   }, [scopedFeatures]);
 
   const visible = useMemo(() => {
-    return dataset.features.filter(feature => matchesFilters(feature, filters));
-  }, [dataset, filters]);
+    const filtered = dataset.features.filter(feature => matchesFilters(feature, filters));
+    if (filters.route === 'all') return filtered;
+    return pickRouteStops(filtered, routeStopLimit);
+  }, [dataset, filters, routeStopLimit]);
 
   const boroughRanking = useMemo(() => {
     return aggregateCounts(
@@ -193,6 +274,11 @@ export default function App() {
       feature => feature.properties.category
     );
   }, [dataset, filters]);
+
+  const routeStationMarkers = useMemo(() => {
+    if (filters.route === 'all') return [];
+    return aggregateRouteStations(visible);
+  }, [filters.route, visible]);
 
   const selectedFeature = useMemo(() => {
     return dataset.features.find(feature => feature.properties.id === selectedFeatureId) || null;
@@ -229,6 +315,7 @@ export default function App() {
           boundary={boundary}
           boroughBoundaries={boroughBoundaries}
           activeBorough={normalizeBoroughName(filters.borough)}
+          routeStationMarkers={routeStationMarkers}
           selectedFeature={selectedFeature}
           selectedSiteContext={selectedSiteContext}
           siteContextById={siteContext.features || {}}
@@ -245,6 +332,8 @@ export default function App() {
           routeDefs={dataset.metadata.routes || {}}
           routeCounts={routeCounts}
           activeRoute={filters.route}
+          routeStopLimit={routeStopLimit}
+          setRouteStopLimit={setRouteStopLimit}
           onSetRoute={value => setFilters(current => ({ ...current, route: value }))}
           onSelectFeature={id => {
             setSelectedFeatureId(id);

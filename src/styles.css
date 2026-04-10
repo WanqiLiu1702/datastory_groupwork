@@ -718,6 +718,110 @@ body {
   color: #3f6f99;
 }
 
+.route-persona-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.route-persona-tab {
+  padding: 10px 12px;
+  border: 1px solid rgba(84, 115, 145, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--muted);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  text-align: center;
+}
+
+.route-persona-tab.active {
+  background: linear-gradient(180deg, #e9f4ff, #f5fbff);
+  border-color: #8fb8df;
+  color: #3f6f99;
+  box-shadow: 0 8px 18px rgba(104, 151, 191, 0.12);
+}
+
+.route-persona-card {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(84, 115, 145, 0.14);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(245, 251, 255, 0.95), rgba(255, 255, 255, 0.94));
+}
+
+.route-persona-card h3 {
+  margin: 4px 0 6px;
+  color: #3f6f99;
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.route-persona-card p {
+  margin: 0;
+  color: var(--muted);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.route-persona-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.route-persona-meta span {
+  color: var(--muted);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+}
+
+.route-length-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.route-length-chip {
+  padding: 8px 12px;
+  border: 1px solid rgba(47, 109, 103, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--muted);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.route-length-chip.active {
+  background: rgba(47, 109, 103, 0.1);
+  border-color: rgba(47, 109, 103, 0.24);
+  color: var(--accent);
+}
+
+.route-reset-button {
+  padding: 8px 12px;
+  border: 1px solid rgba(84, 115, 145, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #3f6f99;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.route-list-heading {
+  margin-top: 16px;
+}
+
 .route-detail-card {
   margin-top: 16px;
   padding: 16px;
@@ -923,6 +1027,16 @@ body {
 .badge-audience {
   background: #eef5ff;
   color: #466f98;
+}
+
+.route-station-marker {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #4f7ea5;
+  border-radius: 4px;
+  background: rgba(233, 244, 255, 0.92);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.88), 0 4px 10px rgba(31, 42, 38, 0.12);
 }
 
 .route-swatch-neutral {
