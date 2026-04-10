@@ -35,22 +35,58 @@ const ROUTE_DEFS = {
   bloomsbury_backstreets: {
     label: 'Bloomsbury Backstreets',
     description: 'Writers, artists and thinkers in Camden and Westminster away from the main tourist trail.',
-    color: '#6c7a52'
+    color: '#6c7a52',
+    duration: '60-75 min walk',
+    focus: 'Literary and scientific central London'
   },
   west_london_creatives: {
     label: 'West London Creatives',
     description: 'Overlooked arts and design plaques across Chelsea, Kensington and riverside streets.',
-    color: '#9b5a43'
+    color: '#9b5a43',
+    duration: '70-90 min walk',
+    focus: 'Arts, music and architecture'
   },
   civic_voices: {
     label: 'Civic Voices',
     description: 'Politicians, campaigners and scientists whose plaques sit in accessible but overlooked neighbourhoods.',
-    color: '#476c8a'
+    color: '#476c8a',
+    duration: '45-60 min walk',
+    focus: 'Politics, reform and public life'
   },
   garden_suburb_retreats: {
     label: 'Garden Suburb Retreats',
     description: 'Quieter residential plaques near parks and side streets across outer London.',
-    color: '#7a5d8f'
+    color: '#7a5d8f',
+    duration: '75-105 min walk',
+    focus: 'Residential calm and green edges'
+  },
+  literary_lives_walk: {
+    label: 'Literary Lives Walk',
+    description: 'Novelists, poets and editors clustered into a tighter route for visitors who want a theme-led walk.',
+    color: '#82539b',
+    duration: '50-70 min walk',
+    focus: 'Literature'
+  },
+  riverside_quiet_edge: {
+    label: 'Riverside Quiet Edge',
+    description: 'Plaques close to river or canal settings where cultural memory meets calmer waterfront detours.',
+    color: '#2f8b8b',
+    duration: '55-75 min walk',
+    focus: 'Water-adjacent hidden heritage'
+  },
+  parkside_pause: {
+    label: 'Parkside Pause',
+    description: 'Shorter quiet-hidden route favouring plaques near parks, commons and greener side streets.',
+    color: '#5d8752',
+    duration: '35-50 min walk',
+    focus: 'Green and quiet places'
+  },
+  step_free_starter: {
+    label: 'Step-Free Starter',
+    description: 'A more accessible starter route using plaques near lift-served TfL stations and shorter walks.',
+    color: '#55657a',
+    duration: '30-45 min walk',
+    focus: 'Shorter approach and easier station access'
   }
 };
 
@@ -349,6 +385,52 @@ function visitorDensity(tourism500m) {
   return 'high';
 }
 
+function walkMinutes(distanceM) {
+  if (distanceM == null) return null;
+  return Math.max(1, Math.ceil(distanceM / 80));
+}
+
+function cycleMinutes(distanceM) {
+  if (distanceM == null) return null;
+  return Math.max(1, Math.ceil(distanceM / 250));
+}
+
+function placeContext({ greenDistance, waterDistance, roadDistance, tourism500m, hiddenQuiet }) {
+  if (waterDistance != null && waterDistance <= 350) return 'waterside';
+  if (greenDistance != null && greenDistance <= 250) return 'park_edge';
+  if ((roadDistance != null && roadDistance < 70) || tourism500m > 6) return 'civic_frontage';
+  if (hiddenQuiet) return 'residential_retreat';
+  return 'street_building';
+}
+
+function approachExperience({ greenDistance, waterDistance, roadDistance, tourism500m }) {
+  if (waterDistance != null && waterDistance <= 350 && roadDistance != null && roadDistance > 100) {
+    return {
+      label: 'Waterside detour',
+      note: 'Approach is likely to include quieter river or canal edges.'
+    };
+  }
+
+  if (greenDistance != null && greenDistance <= 250 && roadDistance != null && roadDistance > 120) {
+    return {
+      label: 'Quiet backstreet approach',
+      note: 'Approach is likely to pass through greener and less traffic-dominated streets.'
+    };
+  }
+
+  if ((roadDistance != null && roadDistance < 70) || tourism500m > 6) {
+    return {
+      label: 'Busy urban arrival',
+      note: 'Expect louder streets, busier crossings or tourism spillover near the site.'
+    };
+  }
+
+  return {
+    label: 'Mixed urban walk',
+    note: 'Approach is broadly walkable but still shaped by ordinary urban street conditions.'
+  };
+}
+
 function hiddenReasons(metrics) {
   const reasons = [];
   if (metrics.tourism50m === 0) reasons.push('Absent from the OSM tourism layer at the site itself');
@@ -365,7 +447,6 @@ function hiddenReasons(metrics) {
 
 function assignRoutes(properties) {
   const routes = [];
-  const [lon, lat] = properties.coordinates;
   const borough = properties.borough || '';
 
   if (
@@ -397,6 +478,40 @@ function assignRoutes(properties) {
     /Barnet|Harrow|Enfield|Redbridge|Waltham Forest|Croydon|Lewisham|Hounslow|Merton|Brent|Ealing/i.test(borough)
   ) {
     routes.push('garden_suburb_retreats');
+  }
+
+  if (
+    properties.hidden_core &&
+    properties.category === 'literature' &&
+    /Camden|Westminster|Islington|Southwark|Kensington|Chelsea|Hammersmith/i.test(borough)
+  ) {
+    routes.push('literary_lives_walk');
+  }
+
+  if (
+    properties.hidden_core &&
+    properties.water_feature_distance_m != null &&
+    properties.water_feature_distance_m <= 350 &&
+    properties.environment_score >= 3
+  ) {
+    routes.push('riverside_quiet_edge');
+  }
+
+  if (
+    properties.hidden_quiet &&
+    properties.green_space_distance_m != null &&
+    properties.green_space_distance_m <= 250
+  ) {
+    routes.push('parkside_pause');
+  }
+
+  if (
+    properties.hidden_core &&
+    properties.station_access_via_lift &&
+    properties.station_distance_m != null &&
+    properties.station_distance_m <= 650
+  ) {
+    routes.push('step_free_starter');
   }
 
   return routes;
@@ -464,6 +579,17 @@ out center tags;
 out center tags;
   `.trim();
 
+  const waterQuery = `
+[out:json][timeout:300];
+(
+  nwr["natural"="water"](${bboxText});
+  nwr["waterway"~"river|canal|stream|ditch|riverbank"](${bboxText});
+  nwr["landuse"="reservoir"](${bboxText});
+  nwr["water"](${bboxText});
+);
+out center tags;
+  `.trim();
+
   const roadQuery = `
 [out:json][timeout:300];
 (
@@ -472,15 +598,17 @@ out center tags;
 out geom tags;
   `.trim();
 
-  const [tourismRaw, greenRaw, roadsRaw] = await Promise.all([
+  const [tourismRaw, greenRaw, waterRaw, roadsRaw] = await Promise.all([
     fetchOverpass(tourismQuery, 'osm-tourism.json'),
     fetchOverpass(greenQuery, 'osm-green-spaces.json'),
+    fetchOverpass(waterQuery, 'osm-water-features.json'),
     fetchOverpass(roadQuery, 'osm-major-roads.json')
   ]);
 
   const stations = normalizeTfLStations(tflRaw.stopPoints || [], bbox);
   const tourismPoints = normalizePointElements(tourismRaw.elements || [], tourismAllowed);
   const greenPoints = normalizePointElements(greenRaw.elements || [], () => true);
+  const waterPoints = normalizePointElements(waterRaw.elements || [], () => true);
   const roadWays = normalizeRoadElements(roadsRaw.elements || []);
 
   const counts = {
@@ -493,6 +621,7 @@ out geom tags;
     const nearest = nearestStation(feature, stations);
     const tourism = tourismMetrics(feature, tourismPoints);
     const greenDistance = nearestGreenDistance(feature, greenPoints);
+    const waterDistance = nearestGreenDistance(feature, waterPoints);
     const roadDistance = nearestRoadDistance(feature, roadWays);
     const stationDistanceM = nearest ? Math.round(nearest.distance) : null;
     const stationLines = nearest ? lineNames(nearest.station.lines) : [];
@@ -517,6 +646,21 @@ out geom tags;
 
     const envScore = environmentScore(greenDistance, roadDistance, tourism.tourism500m);
     const density = visitorDensity(tourism.tourism500m);
+    const walkMins = walkMinutes(stationDistanceM);
+    const cycleMins = cycleMinutes(stationDistanceM);
+    const approach = approachExperience({
+      greenDistance,
+      waterDistance,
+      roadDistance,
+      tourism500m: tourism.tourism500m
+    });
+    const context = placeContext({
+      greenDistance,
+      waterDistance,
+      roadDistance,
+      tourism500m: tourism.tourism500m,
+      hiddenQuiet
+    });
 
     const props = {
       ...feature.properties,
@@ -537,10 +681,17 @@ out geom tags;
       osm_tourism_500m: tourism.tourism500m,
       nearest_tourism_m: tourism.nearestTourismM,
       green_space_distance_m: greenDistance,
+      water_feature_distance_m: waterDistance,
       major_road_distance_m: roadDistance,
+      walk_minutes_from_station: walkMins,
+      cycle_minutes_from_station: cycleMins,
       environment_score: envScore,
+      place_context: context,
+      approach_quality: approach.label,
+      approach_note: approach.note,
       environment_tags: [
         greenDistance != null && greenDistance <= 400 ? 'near_green_space' : null,
+        waterDistance != null && waterDistance <= 350 ? 'near_water' : null,
         roadDistance != null && roadDistance > 100 ? 'away_from_major_roads' : null,
         tourism.tourism500m <= 1 ? 'low_tourism_context' : null,
         accessible ? 'walkable_from_tfl' : null,
@@ -609,6 +760,7 @@ out geom tags;
         stations: stations.length,
         tourismPoints: tourismPoints.length,
         greenPoints: greenPoints.length,
+        waterPoints: waterPoints.length,
         roadWays: roadWays.length
       },
       null,

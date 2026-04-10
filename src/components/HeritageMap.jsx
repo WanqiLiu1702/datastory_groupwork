@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import {
   CAT_LABELS,
+  CONTEXT_LABELS,
   OPENING_LABELS
 } from '../constants.js';
 
@@ -32,6 +33,14 @@ function buildPopup(properties) {
   const official = (properties.official_categories || [])
     .map(category => `<span class="badge">${category}</span>`)
     .join(' ');
+  const travelTiming =
+    properties.walk_minutes_from_station == null || properties.cycle_minutes_from_station == null
+      ? 'No nearby station timing available'
+      : `${properties.walk_minutes_from_station} min walk · ${properties.cycle_minutes_from_station} min cycle`;
+  const nearestStationText =
+    properties.nearest_station && properties.station_distance_m != null
+      ? `${properties.nearest_station} (${properties.station_distance_m}m)`
+      : 'No nearby TfL station in current dataset';
 
   return `
     <div>
@@ -39,16 +48,22 @@ function buildPopup(properties) {
       <p class="popup-address">${properties.address}</p>
       <p class="popup-desc">${properties.summary}</p>
       <div class="popup-row"><strong>Theme</strong><span>${CAT_LABELS[properties.category] || properties.category}</span></div>
+      <div class="popup-row"><strong>Context</strong><span>${CONTEXT_LABELS[properties.place_context] || properties.place_context}</span></div>
       <div class="popup-row"><strong>Visibility</strong><span>${properties.hidden_quiet ? 'Quiet hidden' : properties.hidden_core ? 'Core hidden' : 'Official plaque'}</span></div>
       <div class="popup-row"><strong>Opening</strong><span>${OPENING_LABELS[properties.opening_status] || properties.opening_status}</span></div>
+      <div class="popup-row"><strong>Building access</strong><span>${properties.opening_info}</span></div>
       <div class="popup-row"><strong>Quietness</strong><span title="Environment score ${properties.environment_score}/5">${env}</span></div>
-      <div class="popup-row"><strong>Nearest TfL</strong><span>${properties.nearest_station} (${properties.station_distance_m}m)</span></div>
+      <div class="popup-row"><strong>Nearest TfL</strong><span>${nearestStationText}</span></div>
+      <div class="popup-row"><strong>Walk / cycle</strong><span>${travelTiming}</span></div>
       <div class="popup-row"><strong>Access</strong><span>${properties.station_access_via_lift ? 'Lift access nearby' : 'Standard access'}</span></div>
+      <div class="popup-row"><strong>Travel feel</strong><span>${properties.approach_quality}</span></div>
       <div class="popup-row"><strong>OSM tourism</strong><span>${properties.osm_tourism_500m} POIs within 500m</span></div>
       <div class="popup-row"><strong>Green space</strong><span>${properties.green_space_distance_m}m</span></div>
+      <div class="popup-row"><strong>Water</strong><span>${properties.water_feature_distance_m == null ? 'No nearby feature tagged' : `${properties.water_feature_distance_m}m`}</span></div>
       <div class="popup-row"><strong>Major road</strong><span>${properties.major_road_distance_m}m away</span></div>
       ${official ? `<div class="popup-section"><strong>Official categories</strong><div class="badge-wrap">${official}</div></div>` : ''}
       ${properties.station_lines?.length ? `<div class="popup-section"><strong>TfL lines</strong><div class="badge-wrap">${popupLines(properties.station_lines)}</div></div>` : ''}
+      ${properties.approach_note ? `<div class="popup-section"><strong>Approach note</strong><p class="popup-note">${properties.approach_note}</p></div>` : ''}
       ${properties.hidden_reasons?.length ? `<div class="popup-section"><strong>Why it qualifies</strong><ul class="popup-list">${popupReasons(properties.hidden_reasons)}</ul></div>` : ''}
       <div class="popup-section">
         <a class="popup-link" href="${properties.path}" target="_blank" rel="noreferrer">Open official English Heritage page</a>

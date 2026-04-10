@@ -12,7 +12,7 @@ export const TYPE_LABELS = {
 };
 
 export const OPENING_LABELS = {
-  always_visible: 'Plaque visible from the street'
+  always_visible: 'Plaque visible any time'
 };
 
 export const HIDDEN_LABELS = {
@@ -34,4 +34,20 @@ export const CAT_COLORS = {
   politics_reform: '#9b6b2c',
   architecture: '#4a7a5c',
   exploration: '#2c8a8a'
+};
+
+export const CONTEXT_LABELS = {
+  street_building: 'Street-side building',
+  park_edge: 'Park edge',
+  waterside: 'Waterside',
+  civic_frontage: 'Civic frontage',
+  residential_retreat: 'Residential retreat'
+};
+
+export const CONTEXT_COLORS = {
+  street_building: '#7a6f61',
+  park_edge: '#5d8752',
+  waterside: '#2f8b8b',
+  civic_frontage: '#8c5a3c',
+  residential_retreat: '#6f5f8b'
 };

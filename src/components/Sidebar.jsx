@@ -1,6 +1,9 @@
 import React from 'react';
 import {
+  CAT_COLORS,
   CAT_LABELS,
+  CONTEXT_COLORS,
+  CONTEXT_LABELS,
   HIDDEN_DESCRIPTIONS,
   HIDDEN_LABELS
 } from '../constants.js';
@@ -18,17 +21,19 @@ export default function Sidebar({
 }) {
   const setHidden = value => setFilters(current => ({ ...current, hidden: value, route: 'all' }));
   const setType = value => setFilters(current => ({ ...current, category: value }));
+  const setContext = value => setFilters(current => ({ ...current, context: value }));
   const setBorough = value => setFilters(current => ({ ...current, borough: value }));
   const setMinEnv = value => setFilters(current => ({ ...current, minEnv: value }));
   const setRoute = value => setFilters(current => ({ ...current, route: value }));
   const setSearch = value => setFilters(current => ({ ...current, search: value }));
 
-  const Chip = ({ value, label, current, onClick }) => (
+  const Chip = ({ value, label, current, onClick, swatch }) => (
     <span
       className={'chip' + (current === value ? ' active' : '')}
       onClick={() => onClick(value)}
     >
       {label}
+      {swatch ? <span className="chip-swatch" style={{ background: swatch }} /> : null}
     </span>
   );
 
@@ -93,7 +98,31 @@ export default function Sidebar({
         <div className="chip-row">
           <Chip value="all" label="All" current={filters.category} onClick={setType} />
           {Object.entries(CAT_LABELS).map(([key, label]) => (
-            <Chip key={key} value={key} label={label} current={filters.category} onClick={setType} />
+            <Chip
+              key={key}
+              value={key}
+              label={label}
+              current={filters.category}
+              onClick={setType}
+              swatch={CAT_COLORS[key]}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="panel">
+        <h2>Place Context</h2>
+        <div className="chip-row">
+          <Chip value="all" label="All contexts" current={filters.context} onClick={setContext} />
+          {Object.entries(CONTEXT_LABELS).map(([key, label]) => (
+            <Chip
+              key={key}
+              value={key}
+              label={label}
+              current={filters.context}
+              onClick={setContext}
+              swatch={CONTEXT_COLORS[key]}
+            />
           ))}
         </div>
       </div>
@@ -153,9 +182,30 @@ export default function Sidebar({
                 <div className="route-count">{routeCounts[key] || 0}</div>
               </div>
               <div className="route-desc">{route.description}</div>
+              <div className="route-meta">
+                <span>{route.duration}</span>
+                <span>{route.focus}</span>
+              </div>
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="panel panel-sources">
+        <h2>Access & Travel</h2>
+        <p className="panel-note">
+          Popups and cards now show walk time from the nearest TfL station and an approach-quality label, so users can
+          judge not just whether a site is reachable, but whether the journey is likely to feel quiet, mixed or busy.
+        </p>
+      </div>
+
+      <div className="panel panel-sources">
+        <h2>Impact of Popularity</h2>
+        <p className="panel-note">
+          Hidden sites can lose their hidden quality if too many visitors converge on the same residential streets.
+          Routes here are curated rather than optimized for maximum footfall, and environmental context is shown to
+          encourage slower, more respectful visits.
+        </p>
       </div>
 
       <ResultList features={visibleFeatures} onSelect={onSelectFeature} />

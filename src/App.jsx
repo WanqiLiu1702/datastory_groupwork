@@ -19,6 +19,7 @@ export default function App() {
   const [filters, setFilters] = useState({
     hidden: 'core',
     category: 'all',
+    context: 'all',
     borough: 'all',
     route: 'all',
     minEnv: 1,
@@ -69,6 +70,7 @@ export default function App() {
       const searchText = filters.search.trim().toLowerCase();
       if (!matchesHiddenFilter(feature, filters.hidden)) return false;
       if (filters.category !== 'all' && props.category !== filters.category) return false;
+      if (filters.context !== 'all' && props.place_context !== filters.context) return false;
       if (filters.borough !== 'all' && props.borough !== filters.borough) return false;
       if (props.environment_score < filters.minEnv) return false;
       if (
