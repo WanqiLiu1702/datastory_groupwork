@@ -214,6 +214,15 @@ function formatRouteInstruction(step) {
     : `${type.charAt(0).toUpperCase() + type.slice(1)} on ${street}`;
 }
 
+function emptyContextLayers() {
+  return {
+    tourism: false,
+    green: false,
+    water: false,
+    roads: false
+  };
+}
+
 function normalizeBoroughName(name = '') {
   return name
     .replace(/^London Borough of /i, '')
@@ -245,12 +254,7 @@ export default function App() {
   });
   const [activePanel, setActivePanel] = useState('results');
   const [selectedFeatureId, setSelectedFeatureId] = useState(null);
-  const [contextLayers, setContextLayers] = useState({
-    tourism: false,
-    green: false,
-    water: false,
-    roads: false
-  });
+  const [contextLayers, setContextLayers] = useState(emptyContextLayers);
   const [routeStopLimit, setRouteStopLimit] = useState(4);
   const [routeLegIndex, setRouteLegIndex] = useState(0);
   const [routeDirections, setRouteDirections] = useState({
@@ -404,11 +408,6 @@ export default function App() {
   }, [routeLegIndex, routeLegs]);
 
   useEffect(() => {
-    if (filters.route === 'all' || !activeRouteLeg?.to?.properties?.id) return;
-    setSelectedFeatureId(activeRouteLeg.to.properties.id);
-  }, [activeRouteLeg, filters.route]);
-
-  useEffect(() => {
     if (filters.route === 'all' || visible.length < 2) {
       setRouteDirections({
         status: 'idle',
@@ -471,6 +470,8 @@ export default function App() {
             .map(step => ({
               instruction: formatRouteInstruction(step),
               street: stepStreetName(step),
+              type: step?.maneuver?.type || 'continue',
+              modifier: step?.maneuver?.modifier || null,
               distanceM: Math.max(1, Math.round(step.distance || 0)),
               durationMin: Math.max(1, Math.round((step.duration || 0) / 60))
             }))
@@ -541,7 +542,11 @@ export default function App() {
           routeLegIndex={routeLegIndex}
           setRouteLegIndex={setRouteLegIndex}
           routeDirections={routeDirections}
-          onSetRoute={value => setFilters(current => ({ ...current, route: value }))}
+          onSetRoute={value => {
+            setSelectedFeatureId(null);
+            setContextLayers(emptyContextLayers());
+            setFilters(current => ({ ...current, route: value }));
+          }}
           onSelectFeature={id => {
             setSelectedFeatureId(id);
             mapApiRef.current && mapApiRef.current.focusFeature(id);

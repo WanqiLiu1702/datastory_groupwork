@@ -20,6 +20,33 @@ const PERSONAS = [
   }
 ];
 
+function directionArrow(step) {
+  if (!step) return '•';
+  if (step.type === 'depart') return '●';
+  if (step.type === 'arrive') return '◎';
+
+  switch (step.modifier) {
+    case 'left':
+      return '←';
+    case 'right':
+      return '→';
+    case 'slight left':
+      return '↖';
+    case 'slight right':
+      return '↗';
+    case 'sharp left':
+      return '↰';
+    case 'sharp right':
+      return '↱';
+    case 'straight':
+      return '↑';
+    case 'uturn':
+      return '↺';
+    default:
+      return '↑';
+  }
+}
+
 function orderedFeatures(features) {
   if (features.length <= 2) return features;
 
@@ -444,7 +471,7 @@ export default function ExplorerPanels({
                               <div className="route-turn-list">
                                 {streetStepList.map((step, index) => (
                                   <div key={`${step.instruction}-${index}`} className="route-turn-item">
-                                    <span className="route-turn-index">{index + 1}</span>
+                                    <span className="route-turn-index">{directionArrow(step)}</span>
                                     <span className="route-turn-copy">
                                       <strong>{step.instruction}</strong>
                                       <span>{step.distanceM}m · about {step.durationMin} min</span>
