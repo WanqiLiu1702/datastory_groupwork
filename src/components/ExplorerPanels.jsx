@@ -28,6 +28,7 @@ export default function ExplorerPanels({
   return (
     <>
       <div className="map-toolbar">
+        <div className="floating-toolbar-label">Explore</div>
         <button
           type="button"
           className={'map-toolbar-button' + (activePanel === 'results' ? ' active' : '')}

@@ -269,8 +269,9 @@ export default function HeritageMap({
         group.addLayer(
           L.polyline(item.geometry, {
             color: '#d28a60',
-            weight: 4,
-            opacity: 0.85
+            weight: 6,
+            opacity: 0.88,
+            lineCap: 'round'
           }).bindTooltip(`${item.label} · ${item.distance_m}m`, { sticky: true })
         );
       }

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import HeritageMap from './components/HeritageMap.jsx';
 import ExplorerPanels from './components/ExplorerPanels.jsx';
@@ -27,7 +27,7 @@ export default function App() {
     minEnv: 1,
     search: ''
   });
-  const [activePanel, setActivePanel] = useState(null);
+  const [activePanel, setActivePanel] = useState('results');
   const [selectedFeatureId, setSelectedFeatureId] = useState(null);
   const [contextLayers, setContextLayers] = useState({
     tourism: false,
@@ -36,6 +36,18 @@ export default function App() {
     roads: false
   });
   const mapApiRef = useRef(null);
+
+  const handleFeatureSelect = useCallback(id => {
+    setSelectedFeatureId(id);
+  }, []);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedFeatureId(null);
+  }, []);
+
+  const handleMapReady = useCallback(api => {
+    mapApiRef.current = api;
+  }, []);
 
   useEffect(() => {
     fetch(import.meta.env.BASE_URL + 'hidden-heritage-sites.geojson')
@@ -160,11 +172,9 @@ export default function App() {
           selectedFeature={selectedFeature}
           selectedSiteContext={selectedSiteContext}
           activeContextLayers={contextLayers}
-          onFeatureSelect={id => setSelectedFeatureId(id)}
-          onClearSelection={() => setSelectedFeatureId(null)}
-          onMapReady={api => {
-            mapApiRef.current = api;
-          }}
+          onFeatureSelect={handleFeatureSelect}
+          onClearSelection={handleClearSelection}
+          onMapReady={handleMapReady}
         />
         <ExplorerPanels
           activePanel={activePanel}
@@ -182,6 +192,7 @@ export default function App() {
         {selectedFeature ? (
           <>
             <div className="context-toolbar">
+              <div className="floating-toolbar-label">Context Layers</div>
               {[
                 ['tourism', 'OSM tourism'],
                 ['green', 'Green space'],

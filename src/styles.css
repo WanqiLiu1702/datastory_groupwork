@@ -457,7 +457,15 @@ body {
   right: 18px;
   z-index: 700;
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(47, 63, 58, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.9);
+  box-shadow: 0 14px 30px rgba(31, 42, 38, 0.12);
+  backdrop-filter: blur(12px);
 }
 
 .map-toolbar-button {
@@ -616,15 +624,31 @@ body {
   font-size: 11px;
 }
 
+.floating-toolbar-label {
+  color: var(--muted);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
 .context-toolbar {
   position: absolute;
   left: 18px;
   top: 18px;
   z-index: 680;
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 8px;
   max-width: min(460px, calc(100% - 160px));
+  padding: 10px;
+  border: 1px solid rgba(47, 63, 58, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.92);
+  box-shadow: 0 14px 30px rgba(31, 42, 38, 0.12);
+  backdrop-filter: blur(12px);
 }
 
 .context-toggle {

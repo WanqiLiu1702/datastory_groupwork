@@ -300,7 +300,9 @@ function normalizeRoadElements(elements) {
         id: `way/${element.id}`,
         highway: element.tags.highway,
         name: element.tags.name || null,
+        path: geometry.map(point => [point.lat, point.lon]),
         segments: geometry.slice(1).map((point, index) => ({
+          index,
           startLat: geometry[index].lat,
           startLon: geometry[index].lon,
           endLat: point.lat,
@@ -311,6 +313,12 @@ function normalizeRoadElements(elements) {
       };
     })
     .filter(Boolean);
+}
+
+function roadSnippet(path, segmentIndex, radius = 5) {
+  const start = Math.max(0, segmentIndex - radius);
+  const end = Math.min(path.length, segmentIndex + radius + 2);
+  return path.slice(start, end);
 }
 
 function lineNames(lines = []) {
@@ -414,17 +422,14 @@ function nearestRoadContext(plaque, roadWays) {
         label: road.name || road.highway,
         highway: road.highway,
         distance_m: Math.round(distance),
-        geometry: [
-          [segment.startLat, segment.startLon],
-          [segment.endLat, segment.endLon]
-        ]
+        geometry: roadSnippet(road.path, segment.index, 7)
       };
 
       if (!nearest || distance < nearest.distance_m) {
         nearest = candidate;
       }
 
-      if (distance <= 220) {
+      if (distance <= 550) {
         const existing = nearbyByRoad.get(road.id);
         if (!existing || candidate.distance_m < existing.distance_m) {
           nearbyByRoad.set(road.id, candidate);
