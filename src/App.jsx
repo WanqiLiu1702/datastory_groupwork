@@ -121,21 +121,49 @@ function orderedFeatures(features) {
   return ordered;
 }
 
+function segmentCost(features) {
+  if (features.length <= 1) return 0;
+
+  let cost = 0;
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  let minLon = Infinity;
+  let maxLon = -Infinity;
+
+  for (let index = 0; index < features.length; index += 1) {
+    const [lon, lat] = features[index].geometry.coordinates;
+    minLat = Math.min(minLat, lat);
+    maxLat = Math.max(maxLat, lat);
+    minLon = Math.min(minLon, lon);
+    maxLon = Math.max(maxLon, lon);
+
+    if (index > 0) {
+      const [prevLon, prevLat] = features[index - 1].geometry.coordinates;
+      cost += ((lat - prevLat) ** 2 + (lon - prevLon) ** 2) * 100000;
+    }
+  }
+
+  const spreadPenalty = (maxLat - minLat) ** 2 + (maxLon - minLon) ** 2;
+  return cost + spreadPenalty * 100000;
+}
+
 function pickRouteStops(features, limit) {
   if (features.length <= limit) return orderedFeatures(features);
 
   const ordered = orderedFeatures(features);
-  const picks = [];
+  let bestWindow = ordered.slice(0, limit);
+  let bestCost = segmentCost(bestWindow);
 
-  for (let index = 0; index < limit; index += 1) {
-    const position = Math.round((index * (ordered.length - 1)) / Math.max(limit - 1, 1));
-    const candidate = ordered[position];
-    if (candidate && !picks.includes(candidate)) {
-      picks.push(candidate);
+  for (let start = 1; start <= ordered.length - limit; start += 1) {
+    const window = ordered.slice(start, start + limit);
+    const cost = segmentCost(window);
+    if (cost < bestCost) {
+      bestCost = cost;
+      bestWindow = window;
     }
   }
 
-  return picks;
+  return bestWindow;
 }
 
 function buildRouteLegs(features) {
@@ -381,7 +409,7 @@ export default function App() {
   }, [activeRouteLeg, filters.route]);
 
   useEffect(() => {
-    if (!activeRouteLeg) {
+    if (filters.route === 'all' || visible.length < 2) {
       setRouteDirections({
         status: 'idle',
         data: null,
@@ -391,11 +419,22 @@ export default function App() {
     }
 
     const controller = new AbortController();
-    const [fromLon, fromLat] = activeRouteLeg.from.geometry.coordinates;
-    const [toLon, toLat] = activeRouteLeg.to.geometry.coordinates;
-    const url =
-      `https://router.project-osrm.org/route/v1/foot/${fromLon},${fromLat};${toLon},${toLat}` +
-      '?overview=full&geometries=geojson&steps=true';
+    const coordinates = visible
+      .map(feature => feature.geometry.coordinates)
+      .filter(isValidRouteCoordinate)
+      .map(([lon, lat]) => `${lon},${lat}`)
+      .join(';');
+
+    if (!coordinates) {
+      setRouteDirections({
+        status: 'error',
+        data: null,
+        error: 'No valid route coordinates'
+      });
+      return;
+    }
+
+    const url = `https://router.project-osrm.org/route/v1/foot/${coordinates}?overview=full&geometries=geojson&steps=true`;
 
     setRouteDirections({
       status: 'loading',
@@ -412,8 +451,7 @@ export default function App() {
       })
       .then(payload => {
         const route = payload?.routes?.[0];
-        const leg = route?.legs?.[0];
-        if (!route?.geometry?.coordinates?.length || !leg) {
+        if (!route?.geometry?.coordinates?.length || !route?.legs?.length) {
           throw new Error('No route geometry returned');
         }
 
@@ -425,22 +463,26 @@ export default function App() {
           throw new Error('Returned route geometry was invalid');
         }
 
-        const steps = (leg.steps || [])
-          .filter(step => step?.maneuver?.type !== 'arrive')
-          .map(step => ({
-            instruction: formatRouteInstruction(step),
-            street: stepStreetName(step),
-            distanceM: Math.max(1, Math.round(step.distance || 0)),
-            durationMin: Math.max(1, Math.round((step.duration || 0) / 60))
-          }));
+        const legs = route.legs.map(leg => ({
+          distanceM: Math.round(leg.distance || 0),
+          durationMin: Math.max(1, Math.round((leg.duration || 0) / 60)),
+          steps: (leg.steps || [])
+            .filter(step => step?.maneuver?.type !== 'arrive')
+            .map(step => ({
+              instruction: formatRouteInstruction(step),
+              street: stepStreetName(step),
+              distanceM: Math.max(1, Math.round(step.distance || 0)),
+              durationMin: Math.max(1, Math.round((step.duration || 0) / 60))
+            }))
+        }));
 
         setRouteDirections({
           status: 'ready',
           data: {
             coordinates: safeCoordinates,
-            distanceM: Math.round(route.distance || 0),
-            durationMin: Math.max(1, Math.round((route.duration || 0) / 60)),
-            steps
+            totalDistanceM: Math.round(route.distance || 0),
+            totalDurationMin: Math.max(1, Math.round((route.duration || 0) / 60)),
+            legs
           },
           error: null
         });
@@ -455,7 +497,7 @@ export default function App() {
       });
 
     return () => controller.abort();
-  }, [activeRouteLeg]);
+  }, [filters.route, visible]);
 
   return (
     <div className="app">

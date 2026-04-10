@@ -81,17 +81,39 @@ function pickRouteStops(features, limit) {
   if (features.length <= limit) return orderedFeatures(features);
 
   const ordered = orderedFeatures(features);
-  const picks = [];
+  let bestWindow = ordered.slice(0, limit);
+  let bestCost = Infinity;
 
-  for (let index = 0; index < limit; index += 1) {
-    const position = Math.round((index * (ordered.length - 1)) / Math.max(limit - 1, 1));
-    const candidate = ordered[position];
-    if (candidate && !picks.includes(candidate)) {
-      picks.push(candidate);
+  for (let start = 0; start <= ordered.length - limit; start += 1) {
+    const window = ordered.slice(start, start + limit);
+    let cost = 0;
+    let minLat = Infinity;
+    let maxLat = -Infinity;
+    let minLon = Infinity;
+    let maxLon = -Infinity;
+
+    for (let index = 0; index < window.length; index += 1) {
+      const [lon, lat] = window[index].geometry.coordinates;
+      minLat = Math.min(minLat, lat);
+      maxLat = Math.max(maxLat, lat);
+      minLon = Math.min(minLon, lon);
+      maxLon = Math.max(maxLon, lon);
+
+      if (index > 0) {
+        const [prevLon, prevLat] = window[index - 1].geometry.coordinates;
+        cost += ((lat - prevLat) ** 2 + (lon - prevLon) ** 2) * 100000;
+      }
+    }
+
+    cost += (((maxLat - minLat) ** 2 + (maxLon - minLon) ** 2) * 100000);
+
+    if (cost < bestCost) {
+      bestCost = cost;
+      bestWindow = window;
     }
   }
 
-  return picks;
+  return bestWindow;
 }
 
 export default function ExplorerPanels({
@@ -200,10 +222,11 @@ export default function ExplorerPanels({
     setRouteLegIndex(clamped);
   };
 
-  const streetStepList = routeState.data?.steps?.slice(0, 6) || [];
+  const currentLegDirections = routeState.data?.legs?.[Math.min(routeLegIndex, Math.max((routeState.data?.legs?.length || 1) - 1, 0))] || null;
+  const streetStepList = currentLegDirections?.steps?.slice(0, 6) || [];
   const routeHeadline =
     routeState.status === 'ready'
-      ? `${routeState.data.durationMin} min walk · ${routeState.data.distanceM}m`
+      ? `${currentLegDirections?.durationMin ?? routeState.data.totalDurationMin} min walk · ${currentLegDirections?.distanceM ?? routeState.data.totalDistanceM}m`
       : routeState.status === 'loading'
         ? 'Finding street-level walking route…'
         : routeState.status === 'error'
