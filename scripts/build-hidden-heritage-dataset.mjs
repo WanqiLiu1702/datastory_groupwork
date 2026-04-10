@@ -5,6 +5,7 @@ import process from 'node:process';
 const ROOT = process.cwd();
 const INPUT_PATH = path.join(ROOT, 'public', 'english-heritage-blue-plaques.geojson');
 const OUTPUT_PATH = path.join(ROOT, 'public', 'hidden-heritage-sites.geojson');
+const CONTEXT_OUTPUT_PATH = path.join(ROOT, 'public', 'site-context.json');
 const CACHE_DIR = path.join(ROOT, 'data-cache');
 
 const TFL_STOPPOINTS_URL =
@@ -300,6 +301,10 @@ function normalizeRoadElements(elements) {
         highway: element.tags.highway,
         name: element.tags.name || null,
         segments: geometry.slice(1).map((point, index) => ({
+          startLat: geometry[index].lat,
+          startLon: geometry[index].lon,
+          endLat: point.lat,
+          endLon: point.lon,
           start: projectToMeters(geometry[index].lat, geometry[index].lon),
           end: projectToMeters(point.lat, point.lon)
         }))
@@ -328,46 +333,111 @@ function nearestStation(plaque, stations) {
   return winner;
 }
 
+function labelFromTags(tags, fallbacks, fallbackLabel) {
+  for (const key of fallbacks) {
+    if (tags[key]) return tags[key];
+  }
+  return fallbackLabel;
+}
+
+function sortByDistance(items, limit) {
+  return items
+    .sort((a, b) => a.distance_m - b.distance_m)
+    .slice(0, limit);
+}
+
 function tourismMetrics(plaque, tourismPoints) {
   const lat = plaque.geometry.coordinates[1];
   const lon = plaque.geometry.coordinates[0];
   let count50 = 0;
   let count500 = 0;
   let nearest = Infinity;
+  const nearby = [];
   for (const point of tourismPoints) {
     const distance = haversineMeters(lat, lon, point.lat, point.lon);
     if (distance < nearest) nearest = distance;
     if (distance <= 50) count50 += 1;
-    if (distance <= 500) count500 += 1;
+    if (distance <= 500) {
+      count500 += 1;
+      nearby.push({
+        id: point.id,
+        lat: point.lat,
+        lon: point.lon,
+        distance_m: Math.round(distance),
+        label: labelFromTags(point.tags, ['name', 'tourism', 'information'], 'Tourism feature'),
+        type: labelFromTags(point.tags, ['tourism', 'information'], 'tourism')
+      });
+    }
   }
   return {
     tourism50m: count50,
     tourism500m: count500,
-    nearestTourismM: Number.isFinite(nearest) ? Math.round(nearest) : null
+    nearestTourismM: Number.isFinite(nearest) ? Math.round(nearest) : null,
+    nearby: sortByDistance(nearby, 12)
   };
 }
 
-function nearestGreenDistance(plaque, greenPoints) {
+function nearestContextPoints(plaque, points, radiusM, limit, fallbacks, fallbackLabel) {
   const lat = plaque.geometry.coordinates[1];
   const lon = plaque.geometry.coordinates[0];
   let nearest = Infinity;
-  for (const point of greenPoints) {
+  const nearby = [];
+  for (const point of points) {
     const distance = haversineMeters(lat, lon, point.lat, point.lon);
     if (distance < nearest) nearest = distance;
+    if (distance <= radiusM) {
+      nearby.push({
+        id: point.id,
+        lat: point.lat,
+        lon: point.lon,
+        distance_m: Math.round(distance),
+        label: labelFromTags(point.tags, ['name', ...fallbacks], fallbackLabel),
+        type: labelFromTags(point.tags, fallbacks, fallbackLabel)
+      });
+    }
   }
-  return Number.isFinite(nearest) ? Math.round(nearest) : null;
+  return {
+    nearestDistanceM: Number.isFinite(nearest) ? Math.round(nearest) : null,
+    nearby: sortByDistance(nearby, limit)
+  };
 }
 
-function nearestRoadDistance(plaque, roadWays) {
+function nearestRoadContext(plaque, roadWays) {
   const point = projectToMeters(plaque.geometry.coordinates[1], plaque.geometry.coordinates[0]);
-  let nearest = Infinity;
+  let nearest = null;
+  const nearbyByRoad = new Map();
   for (const road of roadWays) {
     for (const segment of road.segments) {
       const distance = pointToSegmentDistanceMeters(point, segment.start, segment.end);
-      if (distance < nearest) nearest = distance;
+      const candidate = {
+        id: road.id,
+        label: road.name || road.highway,
+        highway: road.highway,
+        distance_m: Math.round(distance),
+        geometry: [
+          [segment.startLat, segment.startLon],
+          [segment.endLat, segment.endLon]
+        ]
+      };
+
+      if (!nearest || distance < nearest.distance_m) {
+        nearest = candidate;
+      }
+
+      if (distance <= 220) {
+        const existing = nearbyByRoad.get(road.id);
+        if (!existing || candidate.distance_m < existing.distance_m) {
+          nearbyByRoad.set(road.id, candidate);
+        }
+      }
     }
   }
-  return Number.isFinite(nearest) ? Math.round(nearest) : null;
+  return {
+    nearestDistanceM: nearest?.distance_m ?? null,
+    nearby: [...nearbyByRoad.values()]
+      .sort((a, b) => a.distance_m - b.distance_m)
+      .slice(0, 3)
+  };
 }
 
 function environmentScore(greenDistance, roadDistance, tourism500m) {
@@ -616,13 +686,31 @@ out geom tags;
     hiddenQuiet: 0,
     routes: Object.fromEntries(Object.keys(ROUTE_DEFS).map(key => [key, 0]))
   };
+  const siteContext = {};
 
   const features = official.features.map(feature => {
     const nearest = nearestStation(feature, stations);
     const tourism = tourismMetrics(feature, tourismPoints);
-    const greenDistance = nearestGreenDistance(feature, greenPoints);
-    const waterDistance = nearestGreenDistance(feature, waterPoints);
-    const roadDistance = nearestRoadDistance(feature, roadWays);
+    const green = nearestContextPoints(
+      feature,
+      greenPoints,
+      1500,
+      3,
+      ['leisure', 'landuse', 'natural'],
+      'Green space'
+    );
+    const water = nearestContextPoints(
+      feature,
+      waterPoints,
+      1500,
+      3,
+      ['waterway', 'water', 'natural'],
+      'Water feature'
+    );
+    const roads = nearestRoadContext(feature, roadWays);
+    const greenDistance = green.nearestDistanceM;
+    const waterDistance = water.nearestDistanceM;
+    const roadDistance = roads.nearestDistanceM;
     const stationDistanceM = nearest ? Math.round(nearest.distance) : null;
     const stationLines = nearest ? lineNames(nearest.station.lines) : [];
     const accessible = stationDistanceM != null && stationDistanceM <= 800;
@@ -716,6 +804,13 @@ out geom tags;
       }
     };
 
+    siteContext[props.id] = {
+      tourism: tourism.nearby,
+      green: green.nearby,
+      water: water.nearby,
+      roads: roads.nearby
+    };
+
     props.routes = assignRoutes(props);
     for (const route of props.routes) counts.routes[route] += 1;
     if (hiddenCore) counts.hiddenCore += 1;
@@ -747,12 +842,17 @@ out geom tags;
     features
   };
 
-  await fs.writeFile(OUTPUT_PATH, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
+  await writeJson(OUTPUT_PATH, output);
+  await writeJson(CONTEXT_OUTPUT_PATH, {
+    created_at: new Date().toISOString(),
+    features: siteContext
+  });
 
   console.log(
     JSON.stringify(
       {
         output: OUTPUT_PATH,
+        contextOutput: CONTEXT_OUTPUT_PATH,
         sourceCount: official.features.length,
         hiddenCore: counts.hiddenCore,
         hiddenQuiet: counts.hiddenQuiet,

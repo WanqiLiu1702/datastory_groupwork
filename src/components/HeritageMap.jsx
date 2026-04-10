@@ -103,11 +103,20 @@ function orderedLatLngs(features) {
   return ordered.map(feature => [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]);
 }
 
+function offsetLatLng(lat, lon, eastMeters = 0, northMeters = 0) {
+  const latOffset = northMeters / 111320;
+  const lonOffset = eastMeters / (111320 * Math.cos((lat * Math.PI) / 180));
+  return [lat + latOffset, lon + lonOffset];
+}
+
 export default function HeritageMap({
   features,
   route,
   routeDefs,
   boundary,
+  selectedFeature,
+  selectedSiteContext,
+  activeContextLayers,
   onMapReady,
   onFeatureSelect,
   onClearSelection
@@ -118,6 +127,7 @@ export default function HeritageMap({
   const lineRef = useRef(null);
   const boundaryRef = useRef(null);
   const accessRingRef = useRef(null);
+  const contextLayerRef = useRef(null);
   const markerByIdRef = useRef({});
 
   function clearAccessRing(map) {
@@ -129,14 +139,147 @@ export default function HeritageMap({
 
   function showAccessRing(map, latlng) {
     clearAccessRing(map);
-    accessRingRef.current = L.circle(latlng, {
-      radius: 400,
-      color: '#325d58',
+    const group = L.layerGroup();
+    const ring10 = L.circle(latlng, {
+      radius: 800,
+      color: '#355f5b',
       weight: 2,
-      opacity: 0.9,
-      fillColor: '#7fa39c',
-      fillOpacity: 0.12
-    }).addTo(map);
+      opacity: 0.95,
+      fillOpacity: 0,
+      dashArray: '12 10'
+    });
+    const ring20 = L.circle(latlng, {
+      radius: 1600,
+      color: '#6f8f89',
+      weight: 2,
+      opacity: 0.8,
+      fillOpacity: 0,
+      dashArray: '12 10'
+    });
+
+    const label10 = L.marker(offsetLatLng(latlng.lat, latlng.lng, 820, 0), {
+      icon: L.divIcon({
+        className: 'range-label-marker',
+        html: '<span class="range-label">10 min walk</span>',
+        iconSize: [96, 24],
+        iconAnchor: [0, 12]
+      })
+    });
+    const label20 = L.marker(offsetLatLng(latlng.lat, latlng.lng, 1620, 0), {
+      icon: L.divIcon({
+        className: 'range-label-marker',
+        html: '<span class="range-label secondary">20 min walk</span>',
+        iconSize: [102, 24],
+        iconAnchor: [0, 12]
+      })
+    });
+
+    group.addLayer(ring20);
+    group.addLayer(ring10);
+    group.addLayer(label10);
+    group.addLayer(label20);
+    group.addTo(map);
+    accessRingRef.current = group;
+  }
+
+  function clearContextLayers(map) {
+    if (contextLayerRef.current) {
+      map.removeLayer(contextLayerRef.current);
+      contextLayerRef.current = null;
+    }
+  }
+
+  function renderContextLayers(map, feature, context, toggles) {
+    clearContextLayers(map);
+    if (!feature || !context) return;
+    const [lon, lat] = feature.geometry.coordinates;
+    const group = L.layerGroup();
+
+    if (toggles.tourism) {
+      for (const item of context.tourism || []) {
+        const marker = L.circleMarker([item.lat, item.lon], {
+          radius: 5,
+          color: '#9e6d5a',
+          weight: 1,
+          fillColor: '#c98a72',
+          fillOpacity: 0.9
+        }).bindTooltip(`${item.label} · ${item.distance_m}m`, { direction: 'top', offset: [0, -4] });
+        group.addLayer(marker);
+      }
+    }
+
+    if (toggles.green) {
+      for (const item of context.green || []) {
+        group.addLayer(
+          L.polyline(
+            [
+              [lat, lon],
+              [item.lat, item.lon]
+            ],
+            {
+              color: '#7d9a6e',
+              weight: 2,
+              opacity: 0.75,
+              dashArray: '6 8'
+            }
+          )
+        );
+        group.addLayer(
+          L.circleMarker([item.lat, item.lon], {
+            radius: 8,
+            color: '#5d7a51',
+            weight: 2,
+            fillColor: '#9abb89',
+            fillOpacity: 0.35
+          }).bindTooltip(`${item.label} · ${item.distance_m}m`, { direction: 'top' })
+        );
+      }
+    }
+
+    if (toggles.water) {
+      for (const item of context.water || []) {
+        group.addLayer(
+          L.polyline(
+            [
+              [lat, lon],
+              [item.lat, item.lon]
+            ],
+            {
+              color: '#6a95a0',
+              weight: 2,
+              opacity: 0.8,
+              dashArray: '3 8'
+            }
+          )
+        );
+        group.addLayer(
+          L.circleMarker([item.lat, item.lon], {
+            radius: 8,
+            color: '#4f7581',
+            weight: 2,
+            fillColor: '#8eb5c0',
+            fillOpacity: 0.3
+          }).bindTooltip(`${item.label} · ${item.distance_m}m`, { direction: 'top' })
+        );
+      }
+    }
+
+    if (toggles.roads) {
+      for (const item of context.roads || []) {
+        group.addLayer(
+          L.polyline(item.geometry, {
+            color: '#d28a60',
+            weight: 4,
+            opacity: 0.85
+          }).bindTooltip(`${item.label} · ${item.distance_m}m`, { sticky: true })
+        );
+      }
+    }
+
+    if (Object.values(toggles).some(Boolean)) {
+      group.addTo(map);
+      contextLayerRef.current = group;
+    }
   }
 
   useEffect(() => {
@@ -155,6 +298,7 @@ export default function HeritageMap({
 
     map.on('click', () => {
       clearAccessRing(map);
+      clearContextLayers(map);
       if (onClearSelection) {
         onClearSelection();
       }
@@ -207,6 +351,7 @@ export default function HeritageMap({
       lineRef.current = null;
     }
     clearAccessRing(map);
+    clearContextLayers(map);
 
     markerByIdRef.current = {};
 
@@ -251,6 +396,21 @@ export default function HeritageMap({
       map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 13 });
     }
   }, [boundary, features, onFeatureSelect, route, routeDefs]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (!selectedFeature) {
+      clearContextLayers(map);
+      clearAccessRing(map);
+      return;
+    }
+
+    const [lon, lat] = selectedFeature.geometry.coordinates;
+    showAccessRing(map, L.latLng(lat, lon));
+    renderContextLayers(map, selectedFeature, selectedSiteContext, activeContextLayers);
+  }, [activeContextLayers, selectedFeature, selectedSiteContext]);
 
   return <div ref={containerRef} className="map-container" />;
 }

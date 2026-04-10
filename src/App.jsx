@@ -16,6 +16,7 @@ export default function App() {
     metadata: {},
     features: []
   });
+  const [siteContext, setSiteContext] = useState({ features: {} });
   const [boundary, setBoundary] = useState(null);
   const [filters, setFilters] = useState({
     hidden: 'core',
@@ -28,6 +29,12 @@ export default function App() {
   });
   const [activePanel, setActivePanel] = useState(null);
   const [selectedFeatureId, setSelectedFeatureId] = useState(null);
+  const [contextLayers, setContextLayers] = useState({
+    tourism: false,
+    green: false,
+    water: false,
+    roads: false
+  });
   const mapApiRef = useRef(null);
 
   useEffect(() => {
@@ -52,6 +59,13 @@ export default function App() {
         });
       })
       .catch(error => console.error('Failed to load greater-london-boundary.json', error));
+  }, []);
+
+  useEffect(() => {
+    fetch(import.meta.env.BASE_URL + 'site-context.json')
+      .then(response => response.json())
+      .then(setSiteContext)
+      .catch(error => console.error('Failed to load site-context.json', error));
   }, []);
 
   const counts = useMemo(() => {
@@ -114,6 +128,11 @@ export default function App() {
     return dataset.features.find(feature => feature.properties.id === selectedFeatureId) || null;
   }, [dataset.features, selectedFeatureId]);
 
+  const selectedSiteContext = useMemo(() => {
+    if (!selectedFeatureId) return null;
+    return siteContext.features?.[selectedFeatureId] || null;
+  }, [selectedFeatureId, siteContext.features]);
+
   useEffect(() => {
     if (!selectedFeatureId) return;
     const stillVisible = visible.some(feature => feature.properties.id === selectedFeatureId);
@@ -138,6 +157,9 @@ export default function App() {
           route={filters.route}
           routeDefs={dataset.metadata.routes || {}}
           boundary={boundary}
+          selectedFeature={selectedFeature}
+          selectedSiteContext={selectedSiteContext}
+          activeContextLayers={contextLayers}
           onFeatureSelect={id => setSelectedFeatureId(id)}
           onClearSelection={() => setSelectedFeatureId(null)}
           onMapReady={api => {
@@ -158,10 +180,30 @@ export default function App() {
           }}
         />
         {selectedFeature ? (
-          <div className="range-legend">
-            <strong>{selectedFeature.properties.name}</strong>
-            <span>Solid ring shows an approximate 5-minute walking catchment, about 400m.</span>
-          </div>
+          <>
+            <div className="context-toolbar">
+              {[
+                ['tourism', 'OSM tourism'],
+                ['green', 'Green space'],
+                ['water', 'Water'],
+                ['roads', 'Major roads']
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={'context-toggle' + (contextLayers[key] ? ' active' : '')}
+                  onClick={() => setContextLayers(current => ({ ...current, [key]: !current[key] }))}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="range-legend">
+              <strong>{selectedFeature.properties.name}</strong>
+              <span>Dashed rings show approximate 10-minute and 20-minute walking catchments, about 800m and 1600m.</span>
+              <span className="range-legend-note">Green and water are shown as OSM feature centroids linked back to the selected site.</span>
+            </div>
+          </>
         ) : null}
       </div>
     </div>
