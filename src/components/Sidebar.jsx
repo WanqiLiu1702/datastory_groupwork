@@ -94,15 +94,6 @@ export default function Sidebar({
         <p className="panel-note">{HIDDEN_DESCRIPTIONS[filters.hidden]}</p>
       </div>
 
-      <RankingPanel
-        boroughRanking={boroughRanking}
-        categoryRanking={categoryRanking}
-        currentBorough={filters.borough}
-        currentCategory={filters.category}
-        onSelectBorough={setBorough}
-        onSelectCategory={setType}
-      />
-
       <div className="panel">
         <h2>Search</h2>
         <input
@@ -186,6 +177,15 @@ export default function Sidebar({
           <span className="slider-value">{filters.minEnv}</span>
         </div>
       </div>
+
+      <RankingPanel
+        boroughRanking={boroughRanking}
+        categoryRanking={categoryRanking}
+        currentBorough={filters.borough}
+        currentCategory={filters.category}
+        onSelectBorough={setBorough}
+        onSelectCategory={setType}
+      />
     </aside>
   );
 }
