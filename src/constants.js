@@ -22,9 +22,9 @@ export const HIDDEN_LABELS = {
 };
 
 export const HIDDEN_DESCRIPTIONS = {
-  core: 'No tourism POI at the site, low nearby tourism context, and within walking distance of TfL.',
-  quiet: 'Core hidden plus closer to green space and farther from major roads.',
-  all: 'The full English Heritage blue plaques catalogue, including non-hidden reference points.'
+  core: 'Official plaques with low tourism visibility and walkable TfL access.',
+  quiet: 'Core hidden sites with greener, quieter surroundings.',
+  all: 'The full English Heritage blue plaque set.'
 };
 
 export const CAT_COLORS = {

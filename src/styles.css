@@ -37,7 +37,7 @@ body {
 
 .app {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 340px 1fr;
   height: 100vh;
   overflow: hidden;
 }
@@ -62,23 +62,23 @@ body {
 }
 
 .sidebar-header {
-  padding: 28px 26px 18px;
+  padding: 24px 24px 16px;
   border-bottom: 1px solid var(--border);
 }
 
 .sidebar-header h1 {
   margin: 0 0 6px;
   color: var(--accent);
-  font-size: 30px;
+  font-size: 34px;
   letter-spacing: 0.3px;
 }
 
 .subtitle {
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.45;
-  font-style: italic;
+  max-width: 240px;
 }
 
 .notice {
@@ -97,7 +97,7 @@ body {
 }
 
 .panel {
-  padding: 18px 24px;
+  padding: 16px 24px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -651,6 +651,45 @@ body {
   backdrop-filter: blur(12px);
 }
 
+.context-summary {
+  position: absolute;
+  left: 18px;
+  top: 92px;
+  z-index: 675;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(360px, calc(100% - 36px));
+}
+
+.context-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid rgba(47, 63, 58, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.94);
+  box-shadow: 0 10px 24px rgba(31, 42, 38, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.context-card-label {
+  color: var(--muted);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.context-card-text {
+  color: var(--accent);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
 .context-toggle {
   padding: 9px 12px;
   border: 1px solid rgba(47, 63, 58, 0.14);
@@ -747,6 +786,10 @@ body {
 .popup-desc {
   margin: 0 0 10px;
   color: #343434;
+}
+
+.popup-badges {
+  margin-bottom: 6px;
 }
 
 .popup-row {
@@ -855,5 +898,12 @@ body {
     left: 12px;
     right: 12px;
     max-width: none;
+  }
+
+  .context-summary {
+    top: 132px;
+    left: 12px;
+    right: 12px;
+    width: auto;
   }
 }

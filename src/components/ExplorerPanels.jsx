@@ -34,7 +34,7 @@ export default function ExplorerPanels({
           className={'map-toolbar-button' + (activePanel === 'results' ? ' active' : '')}
           onClick={() => togglePanel('results')}
         >
-          Places
+          Places list
           <span>{visibleFeatures.length}</span>
         </button>
         <button
@@ -42,7 +42,7 @@ export default function ExplorerPanels({
           className={'map-toolbar-button' + (activePanel === 'routes' ? ' active' : '')}
           onClick={() => togglePanel('routes')}
         >
-          Routes
+          Curated routes
           <span>{availableRouteCount}</span>
         </button>
       </div>
@@ -58,8 +58,8 @@ export default function ExplorerPanels({
                   {activePanel === 'results'
                     ? activeRoute !== 'all' && routeDefs[activeRoute]
                       ? `Now showing the ${routeDefs[activeRoute].label} route.`
-                      : 'Filtered places ranked by hidden score and quietness.'
-                    : 'Choose a route to shift the map from broad search into a guided walk.'}
+                      : 'Filtered hidden-heritage places.'
+                    : 'Choose a route to turn the map into a guided walk.'}
                 </p>
               </div>
               <button type="button" className="overlay-close" onClick={() => setActivePanel(null)}>

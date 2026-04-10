@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Sidebar from './components/Sidebar.jsx';
 import HeritageMap from './components/HeritageMap.jsx';
 import ExplorerPanels from './components/ExplorerPanels.jsx';
+import ContextSummary from './components/ContextSummary.jsx';
 
 function matchesHiddenFilter(feature, hidden) {
   const props = feature.properties;
@@ -160,8 +161,6 @@ export default function App() {
         filters={filters}
         setFilters={setFilters}
         boroughOptions={boroughOptions}
-        visibleCount={visible.length}
-        routeTotal={Object.keys(dataset.metadata.routes || {}).length}
       />
       <div className="map-shell">
         <HeritageMap
@@ -209,10 +208,15 @@ export default function App() {
                 </button>
               ))}
             </div>
+            <ContextSummary
+              selectedFeature={selectedFeature}
+              selectedSiteContext={selectedSiteContext}
+              activeContextLayers={contextLayers}
+            />
             <div className="range-legend">
               <strong>{selectedFeature.properties.name}</strong>
-              <span>Dashed rings show approximate 10-minute and 20-minute walking catchments, about 800m and 1600m.</span>
-              <span className="range-legend-note">Green and water are shown as OSM feature centroids linked back to the selected site.</span>
+              <span>10 and 20 minute dashed rings show approximate walking catchments.</span>
+              <span className="range-legend-note">Context buttons reveal nearby tourism, green, water and major-road cues.</span>
             </div>
           </>
         ) : null}

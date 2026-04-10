@@ -12,9 +12,7 @@ export default function Sidebar({
   counts,
   filters,
   setFilters,
-  boroughOptions,
-  visibleCount,
-  routeTotal
+  boroughOptions
 }) {
   const setHidden = value => setFilters(current => ({ ...current, hidden: value, route: 'all' }));
   const setType = value => setFilters(current => ({ ...current, category: value }));
@@ -36,21 +34,8 @@ export default function Sidebar({
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <h1>Hidden Heritage</h1>
-        <p className="subtitle">London plaques that are official, accessible, but still easy to overlook.</p>
-      </div>
-
-      <div className="notice">
-        <strong>Method.</strong> Core hidden sites are English Heritage plaques with no OSM tourism POI at the address,
-        few nearby tourism POIs, and a walkable TfL station. Quiet hidden sites add greener, less road-dominated surroundings.
-      </div>
-
-      <div className="panel panel-sources">
-        <h2>External Data</h2>
-        <p className="panel-note">
-          English Heritage provides the official plaque catalogue. TfL provides station access context. OSM provides
-          tourism, green-space and road surroundings. The dashed line on the map marks the Greater London boundary.
-        </p>
+        <h1>GemMap</h1>
+        <p className="subtitle">London’s Hidden Heritage Beyond Guidebooks</p>
       </div>
 
       <div className="stats-grid panel">
@@ -66,24 +51,6 @@ export default function Sidebar({
           <span className="stat-label">Quiet hidden</span>
           <strong>{counts.quiet}</strong>
         </div>
-      </div>
-
-      <div className="panel panel-explorer">
-        <h2>Explore Panels</h2>
-        <div className="explorer-stats">
-          <div className="explorer-pill">
-            <strong>{visibleCount}</strong>
-            <span>visible places</span>
-          </div>
-          <div className="explorer-pill">
-            <strong>{routeTotal}</strong>
-            <span>curated routes</span>
-          </div>
-        </div>
-        <p className="panel-note">
-          Use the floating <strong>Places</strong> and <strong>Routes</strong> buttons on the map to switch between the
-          result drawer and the route drawer instead of scrolling through a long sidebar list.
-        </p>
       </div>
 
       <div className="panel">
@@ -125,7 +92,7 @@ export default function Sidebar({
       </div>
 
       <div className="panel">
-        <h2>Place Context</h2>
+        <h2>Context</h2>
         <div className="chip-row">
           <Chip value="all" label="All contexts" current={filters.context} onClick={setContext} />
           {Object.entries(CONTEXT_LABELS).map(([key, label]) => (
@@ -172,23 +139,6 @@ export default function Sidebar({
           <span>5</span>
           <span className="slider-value">{filters.minEnv}</span>
         </div>
-      </div>
-
-      <div className="panel panel-sources">
-        <h2>Access & Travel</h2>
-        <p className="panel-note">
-          Popups and cards now show walk time from the nearest TfL station and an approach-quality label, so users can
-          judge not just whether a site is reachable, but whether the journey is likely to feel quiet, mixed or busy.
-        </p>
-      </div>
-
-      <div className="panel panel-sources">
-        <h2>Impact of Popularity</h2>
-        <p className="panel-note">
-          Hidden sites can lose their hidden quality if too many visitors converge on the same residential streets.
-          Routes here are curated rather than optimized for maximum footfall, and environmental context is shown to
-          encourage slower, more respectful visits.
-        </p>
       </div>
     </aside>
   );
