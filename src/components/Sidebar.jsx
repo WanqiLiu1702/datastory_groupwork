@@ -1,13 +1,13 @@
 import React from 'react';
 import RankingPanel from './RankingPanel.jsx';
-import CategoryMixPanel from './CategoryMixPanel.jsx';
 import {
   CAT_COLORS,
   CAT_LABELS,
   CONTEXT_COLORS,
   CONTEXT_LABELS,
   HIDDEN_DESCRIPTIONS,
-  HIDDEN_LABELS
+  HIDDEN_LABELS,
+  ROUTE_PERSONAS
 } from '../constants.js';
 
 export default function Sidebar({
@@ -17,8 +17,7 @@ export default function Sidebar({
   boroughOptions,
   boroughRanking,
   categoryRanking,
-  categoryComposition,
-  visibleCount,
+  onOpenPlaces,
   onOpenRoutes
 }) {
   const setHidden = value => setFilters(current => ({ ...current, hidden: value, route: 'all' }));
@@ -70,7 +69,7 @@ export default function Sidebar({
     <aside className="sidebar">
       <div className="sidebar-header">
         <h1>Map explorer</h1>
-        <p className="subtitle">Filter places directly or jump into the dedicated route guide.</p>
+        <p className="subtitle">Browse places directly or switch into a route-first guide.</p>
       </div>
 
       <div className="stats-grid panel">
@@ -89,16 +88,31 @@ export default function Sidebar({
       </div>
 
       <div className="panel route-launch-panel">
-        <div>
-          <h2>Route guide</h2>
-          <p className="panel-note">Switch from point browsing to persona-led guided walks.</p>
+        <div className="route-launch-copy">
+          <h2>Explore mode</h2>
+          <div className="route-mode-row">
+            <button type="button" className="route-mode-pill route-mode-pill-secondary" onClick={onOpenPlaces}>
+              Places
+            </button>
+            <button type="button" className="route-mode-pill" onClick={() => onOpenRoutes()}>
+              Route guide
+            </button>
+          </div>
         </div>
-        <button type="button" className="route-launch-button" onClick={onOpenRoutes}>
-          Open route guide
-        </button>
+        <div className="route-persona-shortcuts">
+          {ROUTE_PERSONAS.map(persona => (
+            <button
+              key={persona.id}
+              type="button"
+              className="route-persona-shortcut"
+              style={{ '--persona-accent': persona.accent }}
+              onClick={() => onOpenRoutes(persona.id)}
+            >
+              {persona.shortLabel}
+            </button>
+          ))}
+        </div>
       </div>
-
-      <CategoryMixPanel items={categoryComposition} total={visibleCount} />
 
       <div className="panel">
         <h2>Hidden definition</h2>
@@ -107,7 +121,7 @@ export default function Sidebar({
             <Chip key={key} value={key} label={label} current={filters.hidden} onClick={setHidden} />
           ))}
         </div>
-        <p className="panel-note">{HIDDEN_DESCRIPTIONS[filters.hidden]}</p>
+        <div className="panel-caption">{HIDDEN_DESCRIPTIONS[filters.hidden]}</div>
       </div>
 
       <div className="panel">
@@ -141,7 +155,6 @@ export default function Sidebar({
             );
           })}
         </div>
-        <p className="panel-note">Select one or more heritage themes.</p>
       </div>
 
       <div className="panel">

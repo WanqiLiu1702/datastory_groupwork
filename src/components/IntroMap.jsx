@@ -35,11 +35,12 @@ export default function IntroMap({ boundary, features }) {
       boxZoom: false,
       keyboard: false,
       attributionControl: false
-    }).setView([51.51, -0.13], 10.7);
+    }).setView([51.515, -0.12], 11.05);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       subdomains: 'abcd',
-      maxZoom: 19
+      maxZoom: 19,
+      opacity: 0.62
     }).addTo(map);
 
     mapRef.current = map;
@@ -59,9 +60,9 @@ export default function IntroMap({ boundary, features }) {
         style: {
           color: '#235d58',
           weight: 2,
-          opacity: 0.75,
+          opacity: 0.52,
           fillColor: '#eff7f3',
-          fillOpacity: 0.18,
+          fillOpacity: 0.1,
           dashArray: '10 8'
         },
         interactive: false
@@ -79,21 +80,19 @@ export default function IntroMap({ boundary, features }) {
         const [lon, lat] = feature.geometry.coordinates;
         const color = CAT_COLORS[feature.properties.category] || '#6b8d86';
         L.circleMarker([lat, lon], {
-          radius: feature.properties.hidden_quiet ? 5.5 : 4.5,
+          radius: feature.properties.hidden_quiet ? 4.5 : 3.8,
           color,
-          weight: 1.5,
-          opacity: 0.6,
-          fillColor: hexToRgba(color, 0.3),
-          fillOpacity: 0.8
+          weight: 1.2,
+          opacity: 0.38,
+          fillColor: hexToRgba(color, 0.22),
+          fillOpacity: 0.62
         }).addTo(group);
       });
       group.addTo(map);
       markersRef.current = group;
     }
 
-    if (boundaryRef.current) {
-      map.fitBounds(boundaryRef.current.getBounds(), { padding: [24, 24] });
-    }
+    map.setView([51.515, -0.12], 11.05, { animate: false });
   }, [boundary, features]);
 
   return <div ref={containerRef} className="intro-map" />;

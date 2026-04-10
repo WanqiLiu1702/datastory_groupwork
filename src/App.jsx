@@ -4,6 +4,7 @@ import HeritageMap from './components/HeritageMap.jsx';
 import ExplorerPanels from './components/ExplorerPanels.jsx';
 import ContextSummary from './components/ContextSummary.jsx';
 import HeroLanding from './components/HeroLanding.jsx';
+import CategoryMixPanel from './components/CategoryMixPanel.jsx';
 import { CAT_LABELS, ROUTE_PERSONAS } from './constants.js';
 
 function matchesHiddenFilter(feature, hidden) {
@@ -537,7 +538,17 @@ export default function App() {
     explorerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
-  const openRouteGuide = useCallback(() => {
+  const openPlacesExplorer = useCallback(() => {
+    setSelectedFeatureId(null);
+    setContextLayers(emptyContextLayers());
+    setActivePanel('results');
+    scrollToExplorer();
+  }, [scrollToExplorer]);
+
+  const openRouteGuide = useCallback((personaId = null) => {
+    if (personaId) {
+      setRouteAudience(personaId);
+    }
     setSelectedFeatureId(null);
     setContextLayers(emptyContextLayers());
     setActivePanel('routes');
@@ -555,11 +566,13 @@ export default function App() {
         routePersonaCounts={routePersonaCounts}
         onChoosePersona={setRouteAudience}
         onExploreMap={scrollToExplorer}
+        onOpenPlaces={openPlacesExplorer}
         onOpenRoutes={openRouteGuide}
       />
 
       <section ref={explorerRef} className="explorer-section">
         <div className="app">
+          <CategoryMixPanel items={categoryComposition} total={visible.length} />
           <Sidebar
             counts={counts}
             filters={filters}
@@ -567,8 +580,7 @@ export default function App() {
             boroughOptions={boroughOptions}
             boroughRanking={boroughRanking}
             categoryRanking={categoryRanking}
-            categoryComposition={categoryComposition}
-            visibleCount={visible.length}
+            onOpenPlaces={openPlacesExplorer}
             onOpenRoutes={openRouteGuide}
           />
           <div className="map-shell">

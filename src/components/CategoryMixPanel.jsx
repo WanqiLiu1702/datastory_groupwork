@@ -1,65 +1,79 @@
 import React from 'react';
 import { CAT_COLORS, CAT_LABELS } from '../constants.js';
 
-function percent(value, total) {
-  if (!total) return 0;
-  return Math.round((value / total) * 100);
-}
-
 export default function CategoryMixPanel({ items, total }) {
-  const visibleItems = items.filter(item => item.count > 0);
+  const visibleItems = items
+    .filter(item => item.count > 0)
+    .sort((a, b) => b.count - a.count);
+
+  let cumulativeShare = 0;
+  const segments = visibleItems.map(item => {
+    const share = total ? item.count / total : 0;
+    const midpoint = cumulativeShare + share / 2;
+    cumulativeShare += share;
+
+    return {
+      ...item,
+      share,
+      midpoint
+    };
+  });
 
   return (
-    <div className="panel mix-panel">
-      <div className="mix-panel-head">
-        <div>
-          <h2>Visible mix</h2>
-          <p className="panel-note">The column responds to the current hidden, route, search and theme scope.</p>
-        </div>
-        <div className="mix-total">
+    <aside className="mix-rail">
+      <div className="mix-rail-head">
+        <div className="mix-rail-kicker">Visible mix</div>
+        <div className="mix-rail-total">
           <strong>{total}</strong>
-          <span>visible sites</span>
+          <span>live sites</span>
         </div>
       </div>
 
-      <div className="mix-panel-body">
-        <div className="mix-scale">
-          <span>100%</span>
-          <span>50%</span>
+      <div className="mix-rail-body">
+        <div className="mix-rail-scale">
           <span>0%</span>
+          <span>50%</span>
+          <span>100%</span>
         </div>
 
-        <div className="mix-column-shell">
-          <div className="mix-column-grid">
+        <div className="mix-rail-chart">
+          <div className="mix-rail-grid">
             <span />
             <span />
             <span />
           </div>
-          <div className="mix-column">
-            {visibleItems.map(item => (
+
+          <div className="mix-rail-track">
+            {segments.map(item => (
               <div
                 key={item.key}
-                className="mix-segment"
+                className="mix-rail-segment"
                 style={{
-                  height: `${(item.count / Math.max(total, 1)) * 100}%`,
+                  height: `${item.share * 100}%`,
                   background: CAT_COLORS[item.key] || '#7b8f87'
                 }}
-                title={`${CAT_LABELS[item.key] || item.key}: ${item.count} (${percent(item.count, total)}%)`}
+                title={`${CAT_LABELS[item.key] || item.key}: ${item.count}`}
               />
             ))}
           </div>
-        </div>
 
-        <div className="mix-legend">
-          {visibleItems.map(item => (
-            <div key={item.key} className="mix-legend-row">
-              <span className="mix-legend-swatch" style={{ background: CAT_COLORS[item.key] || '#7b8f87' }} />
-              <span className="mix-legend-label">{CAT_LABELS[item.key] || item.key}</span>
-              <span className="mix-legend-value">{percent(item.count, total)}%</span>
-            </div>
-          ))}
+          <div className="mix-rail-labels">
+            {segments.map(item => (
+              <div
+                key={item.key}
+                className={'mix-rail-label' + (item.share < 0.12 ? ' compact' : '')}
+                style={{
+                  top: `${item.midpoint * 100}%`,
+                  color: CAT_COLORS[item.key] || '#7b8f87'
+                }}
+                title={`${CAT_LABELS[item.key] || item.key}: ${item.count}`}
+              >
+                {CAT_LABELS[item.key] || item.key}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }
