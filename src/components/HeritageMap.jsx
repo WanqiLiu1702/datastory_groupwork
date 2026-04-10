@@ -28,6 +28,18 @@ function tourismTypeLabel(type = 'other') {
   return TOURISM_TYPE_LABELS[type] || type.replace(/_/g, ' ');
 }
 
+function tourismBadgeText(type = 'other') {
+  const mapping = {
+    information: 'Info',
+    artwork: 'Art',
+    museum: 'Museum',
+    gallery: 'Gallery',
+    attraction: 'Visit',
+    viewpoint: 'View'
+  };
+  return mapping[type] || tourismTypeLabel(type);
+}
+
 function summarizeTourism(items = []) {
   if (!items.length) return 'None within 500m';
 
@@ -257,15 +269,21 @@ export default function HeritageMap({
     if (toggles.tourism) {
       for (const item of context.tourism || []) {
         const color = TOURISM_TYPE_COLORS[item.type] || '#c5846e';
-        const marker = L.circleMarker([item.lat, item.lon], {
-          radius: 6,
-          color,
-          weight: 1.5,
-          fillColor: color,
-          fillOpacity: 0.3
+        const marker = L.marker([item.lat, item.lon], {
+          icon: L.divIcon({
+            className: '',
+            html: `
+              <span class="context-badge tourism" style="--context-accent:${color}; --context-bg:${hexToRgba(color, 0.18)};">
+                ${tourismBadgeText(item.type)}
+              </span>
+            `,
+            iconSize: [56, 24],
+            iconAnchor: [28, 12]
+          }),
+          zIndexOffset: 300
         }).bindTooltip(`${tourismTypeLabel(item.type)} · ${item.label} · ${item.distance_m}m`, {
           direction: 'top',
-          offset: [0, -4]
+          offset: [0, -8]
         });
         group.addLayer(marker);
       }
@@ -274,27 +292,26 @@ export default function HeritageMap({
     if (toggles.green) {
       for (const item of context.green || []) {
         group.addLayer(
-          L.polyline(
-            [
-              [lat, lon],
-              [item.lat, item.lon]
-            ],
-            {
-              color: '#7d9a6e',
-              weight: 2,
-              opacity: 0.75,
-              dashArray: '6 8'
-            }
-          )
+          L.circle([item.lat, item.lon], {
+            radius: 110,
+            color: '#4f7a46',
+            weight: 2.5,
+            opacity: 0.85,
+            fillColor: '#7da270',
+            fillOpacity: 0.06,
+            dashArray: '10 6'
+          }).bindTooltip(`Green space · ${item.label} · ${item.distance_m}m`, { direction: 'top' })
         );
         group.addLayer(
-          L.circleMarker([item.lat, item.lon], {
-            radius: 8,
-            color: '#5d7a51',
-            weight: 2,
-            fillColor: '#9abb89',
-            fillOpacity: 0.35
-          }).bindTooltip(`${item.label} · ${item.distance_m}m`, { direction: 'top' })
+          L.marker([item.lat, item.lon], {
+            icon: L.divIcon({
+              className: '',
+              html: '<span class="context-badge green">Green</span>',
+              iconSize: [58, 24],
+              iconAnchor: [29, 12]
+            }),
+            zIndexOffset: 250
+          })
         );
       }
     }
@@ -302,27 +319,26 @@ export default function HeritageMap({
     if (toggles.water) {
       for (const item of context.water || []) {
         group.addLayer(
-          L.polyline(
-            [
-              [lat, lon],
-              [item.lat, item.lon]
-            ],
-            {
-              color: '#6a95a0',
-              weight: 2,
-              opacity: 0.8,
-              dashArray: '3 8'
-            }
-          )
+          L.circle([item.lat, item.lon], {
+            radius: 140,
+            color: '#416c92',
+            weight: 2.5,
+            opacity: 0.9,
+            fillColor: '#6d95c0',
+            fillOpacity: 0.05,
+            dashArray: '4 9'
+          }).bindTooltip(`Water feature · ${item.label} · ${item.distance_m}m`, { direction: 'top' })
         );
         group.addLayer(
-          L.circleMarker([item.lat, item.lon], {
-            radius: 8,
-            color: '#4f7581',
-            weight: 2,
-            fillColor: '#8eb5c0',
-            fillOpacity: 0.3
-          }).bindTooltip(`${item.label} · ${item.distance_m}m`, { direction: 'top' })
+          L.marker([item.lat, item.lon], {
+            icon: L.divIcon({
+              className: '',
+              html: '<span class="context-badge water">Water</span>',
+              iconSize: [58, 24],
+              iconAnchor: [29, 12]
+            }),
+            zIndexOffset: 250
+          })
         );
       }
     }
@@ -331,9 +347,17 @@ export default function HeritageMap({
       for (const item of context.roads || []) {
         group.addLayer(
           L.polyline(item.geometry, {
-            color: '#d28a60',
-            weight: 6,
-            opacity: 0.88,
+            color: 'rgba(255,255,255,0.92)',
+            weight: 10,
+            opacity: 0.9,
+            lineCap: 'round'
+          })
+        );
+        group.addLayer(
+          L.polyline(item.geometry, {
+            color: '#b25a36',
+            weight: 6.5,
+            opacity: 0.95,
             lineCap: 'round'
           }).bindTooltip(`${item.label} · ${item.distance_m}m`, { sticky: true })
         );
