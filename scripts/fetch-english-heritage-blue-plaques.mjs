@@ -5,7 +5,13 @@ import process from 'node:process';
 const BASE_URL = 'https://www.english-heritage.org.uk';
 const SEARCH_URL =
   `${BASE_URL}/api/BluePlaqueSearch/GetMatchingBluePlaques?pageBP=1&sizeBP=2000&borBP=0&keyBP=&catBP=`;
-const OUTPUT_PATH = path.join(process.cwd(), 'public', 'english-heritage-blue-plaques.geojson');
+const OUTPUT_PATH = path.join(
+  process.cwd(),
+  'data',
+  'source',
+  'english-heritage',
+  'english-heritage-blue-plaques.geojson'
+);
 const CONCURRENCY = 8;
 const LIMIT = Number.parseInt(process.env.LIMIT || '0', 10) || 0;
 const COORDINATE_FALLBACKS = {

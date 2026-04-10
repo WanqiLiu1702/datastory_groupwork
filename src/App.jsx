@@ -9,6 +9,11 @@ import StoryContributionSection from './components/StoryContributionSection.jsx'
 import AboutSection from './components/AboutSection.jsx';
 import { CAT_LABELS, ROUTE_PERSONAS } from './constants.js';
 
+const DATASET_PATH = 'data/processed/hidden-heritage-sites.geojson';
+const SITE_CONTEXT_PATH = 'data/processed/site-context.json';
+const LONDON_BOUNDARY_PATH = 'data/boundaries/greater-london-boundary.json';
+const LONDON_BOROUGHS_PATH = 'data/boundaries/london-boroughs.geojson';
+
 function matchesHiddenFilter(feature, hidden) {
   const props = feature.properties;
   if (hidden === 'quiet') return props.hidden_quiet;
@@ -288,14 +293,14 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    fetch(import.meta.env.BASE_URL + 'hidden-heritage-sites.geojson')
+    fetch(import.meta.env.BASE_URL + DATASET_PATH)
       .then(response => response.json())
       .then(setDataset)
-      .catch(error => console.error('Failed to load hidden-heritage-sites.geojson', error));
+      .catch(error => console.error(`Failed to load ${DATASET_PATH}`, error));
   }, []);
 
   useEffect(() => {
-    fetch(import.meta.env.BASE_URL + 'greater-london-boundary.json')
+    fetch(import.meta.env.BASE_URL + LONDON_BOUNDARY_PATH)
       .then(response => response.json())
       .then(data => {
         const item = Array.isArray(data) ? data[0] : data;
@@ -308,21 +313,21 @@ export default function App() {
           geometry: item.geojson
         });
       })
-      .catch(error => console.error('Failed to load greater-london-boundary.json', error));
+      .catch(error => console.error(`Failed to load ${LONDON_BOUNDARY_PATH}`, error));
   }, []);
 
   useEffect(() => {
-    fetch(import.meta.env.BASE_URL + 'site-context.json')
+    fetch(import.meta.env.BASE_URL + SITE_CONTEXT_PATH)
       .then(response => response.json())
       .then(setSiteContext)
-      .catch(error => console.error('Failed to load site-context.json', error));
+      .catch(error => console.error(`Failed to load ${SITE_CONTEXT_PATH}`, error));
   }, []);
 
   useEffect(() => {
-    fetch(import.meta.env.BASE_URL + 'london-boroughs.geojson')
+    fetch(import.meta.env.BASE_URL + LONDON_BOROUGHS_PATH)
       .then(response => response.json())
       .then(setBoroughBoundaries)
-      .catch(error => console.error('Failed to load london-boroughs.geojson', error));
+      .catch(error => console.error(`Failed to load ${LONDON_BOROUGHS_PATH}`, error));
   }, []);
 
   const counts = useMemo(() => {

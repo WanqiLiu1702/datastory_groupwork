@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "deploy": "gh-pages -d dist",
     "data:fetch-eh": "node scripts/fetch-english-heritage-blue-plaques.mjs",
-    "data:build-hidden": "node scripts/build-hidden-heritage-dataset.mjs"
+    "data:build-hidden": "node scripts/build-hidden-heritage-dataset.mjs",
+    "data:rebuild": "npm run data:fetch-eh && npm run data:build-hidden"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

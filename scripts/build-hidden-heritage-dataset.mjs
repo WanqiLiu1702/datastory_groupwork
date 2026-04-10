@@ -3,9 +3,9 @@ import path from 'node:path';
 import process from 'node:process';
 
 const ROOT = process.cwd();
-const INPUT_PATH = path.join(ROOT, 'public', 'english-heritage-blue-plaques.geojson');
-const OUTPUT_PATH = path.join(ROOT, 'public', 'hidden-heritage-sites.geojson');
-const CONTEXT_OUTPUT_PATH = path.join(ROOT, 'public', 'site-context.json');
+const INPUT_PATH = path.join(ROOT, 'data', 'source', 'english-heritage', 'english-heritage-blue-plaques.geojson');
+const OUTPUT_PATH = path.join(ROOT, 'public', 'data', 'processed', 'hidden-heritage-sites.geojson');
+const CONTEXT_OUTPUT_PATH = path.join(ROOT, 'public', 'data', 'processed', 'site-context.json');
 const CACHE_DIR = path.join(ROOT, 'data-cache');
 
 const TFL_STOPPOINTS_URL =
