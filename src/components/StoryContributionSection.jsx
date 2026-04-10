@@ -209,18 +209,18 @@ export default function StoryContributionSection({ boundary, onOpenPlaces, onOpe
             </label>
 
             <button type="submit" className="story-submit" disabled={!pickedLocation || !suggestion.name || !suggestion.story}>
-              Save prototype suggestion
+              Save local prototype draft
             </button>
 
             <p className="story-note">
-              Suggestions stay inside this prototype session. A real public version would need moderation and checks for
-              community sensitivity before surfacing a place on the map.
+              No live server submission yet. Suggestions stay inside this prototype session until a moderated backend is
+              added, with checks for community sensitivity before surfacing a place on the map.
             </p>
 
             {submitted ? (
               <div className="story-success">
-                Draft captured for <strong>{pickedLocation ? coordinateSummary : 'this point'}</strong>. Nothing is published
-                automatically.
+                Local draft captured for <strong>{pickedLocation ? coordinateSummary : 'this point'}</strong>. Nothing is sent
+                or published automatically.
               </div>
             ) : null}
           </form>

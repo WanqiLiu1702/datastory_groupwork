@@ -102,8 +102,8 @@ export default function HeroLanding({
           <button type="button" className="hero-menu-card" onClick={onOpenStories}>
             <span className="hero-menu-kicker">03</span>
             <strong>Uncover Stories</strong>
-            <p>Suggest overlooked heritage sites that are missing from the current map and place them on London yourself.</p>
-            <span className="hero-menu-meta">Contribution prototype</span>
+            <p>Draft a missing heritage suggestion, place it on London and flag why it should be reviewed.</p>
+            <span className="hero-menu-meta">Local draft prototype</span>
           </button>
 
           <button type="button" className="hero-menu-card" onClick={onOpenAbout}>

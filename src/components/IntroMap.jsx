@@ -40,7 +40,7 @@ export default function IntroMap({ boundary, features }) {
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       subdomains: 'abcd',
       maxZoom: 19,
-      opacity: 0.42
+      opacity: 0.58
     }).addTo(map);
 
     mapRef.current = map;
@@ -60,7 +60,7 @@ export default function IntroMap({ boundary, features }) {
         style: {
           color: '#235d58',
           weight: 2,
-          opacity: 0.24,
+          opacity: 0.32,
           fillColor: '#eef5f0',
           fillOpacity: 0,
           dashArray: '10 8'
@@ -83,9 +83,9 @@ export default function IntroMap({ boundary, features }) {
           radius: feature.properties.hidden_quiet ? 4.4 : 3.8,
           color,
           weight: 1.1,
-          opacity: 0.42,
-          fillColor: hexToRgba(color, 0.12),
-          fillOpacity: 0.46
+          opacity: 0.56,
+          fillColor: hexToRgba(color, 0.18),
+          fillOpacity: 0.58
         }).addTo(group);
       });
       group.addTo(map);
