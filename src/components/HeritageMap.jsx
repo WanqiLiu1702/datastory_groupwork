@@ -483,7 +483,8 @@ export default function HeritageMap({
         color: ROUTE_COLORS[route] || routeDefs[route]?.color || '#2b4a3f',
         weight: 4,
         opacity: 0.65,
-        dashArray: '8 8'
+        dashArray: '8 8',
+        className: 'route-flow-line'
       }).addTo(map);
 
       if (routeStationMarkers?.length) {

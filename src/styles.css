@@ -1054,6 +1054,26 @@ body {
   letter-spacing: 0.3px;
 }
 
+.route-flow-line {
+  animation: route-flow 9s linear infinite;
+}
+
+@keyframes route-flow {
+  from {
+    stroke-dashoffset: 0;
+  }
+
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-flow-line {
+    animation: none;
+  }
+}
+
 .route-swatch-neutral {
   background: #7b7167;
 }
