@@ -28,18 +28,6 @@ function tourismTypeLabel(type = 'other') {
   return TOURISM_TYPE_LABELS[type] || type.replace(/_/g, ' ');
 }
 
-function tourismBadgeText(type = 'other') {
-  const mapping = {
-    information: 'Info',
-    artwork: 'Art',
-    museum: 'Museum',
-    gallery: 'Gallery',
-    attraction: 'Visit',
-    viewpoint: 'View'
-  };
-  return mapping[type] || tourismTypeLabel(type);
-}
-
 function summarizeTourism(items = []) {
   if (!items.length) return 'None within 500m';
 
@@ -273,17 +261,15 @@ export default function HeritageMap({
           icon: L.divIcon({
             className: '',
             html: `
-              <span class="context-badge tourism" style="--context-accent:${color}; --context-bg:${hexToRgba(color, 0.18)};">
-                ${tourismBadgeText(item.type)}
-              </span>
+              <span class="context-symbol tourism" style="--context-accent:${color}; --context-bg:${hexToRgba(color, 0.18)};"></span>
             `,
-            iconSize: [56, 24],
-            iconAnchor: [28, 12]
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
           }),
           zIndexOffset: 300
         }).bindTooltip(`${tourismTypeLabel(item.type)} · ${item.label} · ${item.distance_m}m`, {
           direction: 'top',
-          offset: [0, -8]
+          offset: [0, -6]
         });
         group.addLayer(marker);
       }
@@ -293,25 +279,14 @@ export default function HeritageMap({
       for (const item of context.green || []) {
         group.addLayer(
           L.circle([item.lat, item.lon], {
-            radius: 110,
+            radius: 95,
             color: '#4f7a46',
-            weight: 2.5,
+            weight: 2,
             opacity: 0.85,
             fillColor: '#7da270',
-            fillOpacity: 0.06,
-            dashArray: '10 6'
+            fillOpacity: 0.1,
+            dashArray: '8 8'
           }).bindTooltip(`Green space · ${item.label} · ${item.distance_m}m`, { direction: 'top' })
-        );
-        group.addLayer(
-          L.marker([item.lat, item.lon], {
-            icon: L.divIcon({
-              className: '',
-              html: '<span class="context-badge green">Green</span>',
-              iconSize: [58, 24],
-              iconAnchor: [29, 12]
-            }),
-            zIndexOffset: 250
-          })
         );
       }
     }
@@ -320,25 +295,14 @@ export default function HeritageMap({
       for (const item of context.water || []) {
         group.addLayer(
           L.circle([item.lat, item.lon], {
-            radius: 140,
+            radius: 120,
             color: '#416c92',
-            weight: 2.5,
+            weight: 2,
             opacity: 0.9,
             fillColor: '#6d95c0',
-            fillOpacity: 0.05,
+            fillOpacity: 0.08,
             dashArray: '4 9'
           }).bindTooltip(`Water feature · ${item.label} · ${item.distance_m}m`, { direction: 'top' })
-        );
-        group.addLayer(
-          L.marker([item.lat, item.lon], {
-            icon: L.divIcon({
-              className: '',
-              html: '<span class="context-badge water">Water</span>',
-              iconSize: [58, 24],
-              iconAnchor: [29, 12]
-            }),
-            zIndexOffset: 250
-          })
         );
       }
     }
@@ -478,7 +442,14 @@ export default function HeritageMap({
       const [lon, lat] = feature.geometry.coordinates;
       const marker = L.marker([lat, lon], {
         icon: buildIcon(feature.properties.category, feature.properties)
-      }).bindPopup(buildPopup(feature.properties, siteContextRef.current?.[feature.properties.id]), { maxWidth: 360 });
+      })
+        .bindPopup(buildPopup(feature.properties, siteContextRef.current?.[feature.properties.id]), { maxWidth: 360 })
+        .bindTooltip(feature.properties.name, {
+          direction: 'top',
+          offset: [0, -12],
+          opacity: 0.98,
+          className: 'heritage-hover-label'
+        });
 
       marker.on('click', event => {
         event.originalEvent?.stopPropagation?.();
