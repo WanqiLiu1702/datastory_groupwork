@@ -748,6 +748,7 @@ body {
   border-color: #8fb8df;
   color: #3f6f99;
   box-shadow: 0 8px 18px rgba(104, 151, 191, 0.12);
+  transform: translateY(-1px);
 }
 
 .route-persona-card {
@@ -832,6 +833,11 @@ body {
   border: 1px solid rgba(47, 109, 103, 0.16);
   border-radius: 16px;
   background: linear-gradient(180deg, rgba(226, 242, 238, 0.92), rgba(255, 255, 255, 0.94));
+}
+
+.overlay-panel.route-panel-open.is-open .route-persona-card,
+.overlay-panel.route-panel-open.is-open .route-detail-card {
+  animation: route-card-reveal 360ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .route-detail-head h3 {
@@ -1014,6 +1020,12 @@ body {
   flex-direction: column;
   gap: 4px;
   margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.82), rgba(225, 242, 238, 0.72), rgba(255, 255, 255, 0.82));
+  background-size: 200% 100%;
+  animation: route-stepper-sheen 5.8s ease-in-out infinite;
 }
 
 .route-stepper-card strong {
@@ -1044,6 +1056,7 @@ body {
   border-radius: 999px;
   background: rgba(233, 244, 255, 0.96);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.88), 0 6px 14px rgba(31, 42, 38, 0.14);
+  animation: route-station-pulse 2.2s ease-in-out infinite;
 }
 
 .route-station-marker span {
@@ -1055,7 +1068,7 @@ body {
 }
 
 .route-flow-line {
-  animation: route-flow 9s linear infinite;
+  animation: route-flow 5.5s linear infinite;
 }
 
 @keyframes route-flow {
@@ -1068,8 +1081,51 @@ body {
   }
 }
 
+@keyframes route-station-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.88), 0 6px 14px rgba(31, 42, 38, 0.14);
+  }
+
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 6px rgba(143, 184, 223, 0.16), 0 8px 18px rgba(31, 42, 38, 0.16);
+  }
+}
+
+@keyframes route-card-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes route-stepper-sheen {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .route-flow-line {
+    animation: none;
+  }
+
+  .route-station-marker,
+  .route-stepper-card,
+  .overlay-panel.route-panel-open.is-open .route-persona-card,
+  .overlay-panel.route-panel-open.is-open .route-detail-card {
     animation: none;
   }
 }
