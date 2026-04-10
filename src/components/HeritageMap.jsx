@@ -160,6 +160,10 @@ function offsetLatLng(lat, lon, eastMeters = 0, northMeters = 0) {
   return [lat + latOffset, lon + lonOffset];
 }
 
+function accessBounds(latlng, radius = 1600) {
+  return L.latLng(latlng).toBounds(radius * 2);
+}
+
 function isValidLatLngPair(value) {
   return (
     Array.isArray(value) &&
@@ -404,7 +408,11 @@ export default function HeritageMap({
         focusFeature(id) {
           const marker = markerByIdRef.current[id];
           if (marker) {
-            map.setView(marker.getLatLng(), 15, { animate: true });
+            map.fitBounds(accessBounds(marker.getLatLng()), {
+              padding: [44, 44],
+              maxZoom: 15,
+              animate: true
+            });
             showAccessRing(map, marker.getLatLng());
             marker.openPopup();
           }
@@ -507,6 +515,11 @@ export default function HeritageMap({
       marker.on('click', event => {
         event.originalEvent?.stopPropagation?.();
         marker.setPopupContent(buildPopup(feature.properties, siteContextRef.current?.[feature.properties.id]));
+        map.fitBounds(accessBounds(marker.getLatLng()), {
+          padding: [44, 44],
+          maxZoom: 15,
+          animate: true
+        });
         showAccessRing(map, marker.getLatLng());
         if (onFeatureSelect) {
           onFeatureSelect(feature.properties.id);
