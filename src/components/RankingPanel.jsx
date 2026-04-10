@@ -72,6 +72,7 @@ export default function RankingPanel({
       <div className="ranking-list">
         {items.map(item => {
           const ratio = Math.max(12, Math.round((item.count / max) * 100));
+          const dotCount = Math.max(3, Math.min(18, Math.round((item.count / max) * 16)));
           const active =
             mode === 'borough'
               ? item.key === currentSelection && currentSelection !== 'all'
@@ -93,7 +94,13 @@ export default function RankingPanel({
                 <span className="ranking-count">{item.count}</span>
               </div>
               <span className="ranking-bar-track">
-                <span className="ranking-bar-fill" style={{ width: `${ratio}%` }} />
+                <span className="ranking-bar-fill" style={{ width: `${ratio}%` }}>
+                  <span className="ranking-dot-cluster">
+                    {Array.from({ length: dotCount }).map((_, index) => (
+                      <span key={index} className="ranking-heritage-dot" />
+                    ))}
+                  </span>
+                </span>
               </span>
             </button>
           );
