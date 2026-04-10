@@ -257,13 +257,14 @@ export default function App() {
     minEnv: 1,
     search: ''
   });
-  const [activePanel, setActivePanel] = useState('results');
+  const [activePanel, setActivePanel] = useState(null);
   const [selectedFeatureId, setSelectedFeatureId] = useState(null);
   const [contextLayers, setContextLayers] = useState(emptyContextLayers);
   const [routeStopLimit, setRouteStopLimit] = useState(4);
   const [routeLegIndex, setRouteLegIndex] = useState(0);
   const [routeAudience, setRouteAudience] = useState(ROUTE_PERSONAS[0].id);
   const [experienceMode, setExperienceMode] = useState('places');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [routeDirections, setRouteDirections] = useState({
     status: 'idle',
     data: null,
@@ -553,14 +554,17 @@ export default function App() {
 
   const openPlacesExplorer = useCallback(() => {
     setExperienceMode('places');
+    setSidebarOpen(false);
     setSelectedFeatureId(null);
     setContextLayers(emptyContextLayers());
-    setActivePanel('results');
+    setFilters(current => ({ ...current, route: 'all' }));
+    setActivePanel(null);
     scrollToExplorer();
   }, [scrollToExplorer]);
 
   const openRouteGuide = useCallback((personaId = null) => {
     setExperienceMode('routes');
+    setSidebarOpen(false);
     if (personaId) {
       setRouteAudience(personaId);
     }
@@ -588,7 +592,13 @@ export default function App() {
       />
 
       <section ref={explorerRef} className="explorer-section">
-        <div className={'app' + (experienceMode === 'routes' ? ' app-route-focus' : '')}>
+        <div
+          className={
+            'app' +
+            (experienceMode === 'routes' ? ' app-route-focus' : '') +
+            (experienceMode === 'places' && !sidebarOpen ? ' app-sidebar-collapsed' : '')
+          }
+        >
           <CategoryMixPanel items={categoryComposition} total={visible.length} />
           <Sidebar
             counts={counts}
@@ -597,7 +607,8 @@ export default function App() {
             boroughOptions={boroughOptions}
             boroughRanking={boroughRanking}
             categoryRanking={categoryRanking}
-            experienceMode={experienceMode}
+            sidebarOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
             onOpenPlaces={openPlacesExplorer}
             onOpenRoutes={openRouteGuide}
           />
@@ -637,6 +648,11 @@ export default function App() {
               routeDirections={routeDirections}
               onActivatePlacesMode={() => setExperienceMode('places')}
               onActivateRouteMode={() => setExperienceMode('routes')}
+              sidebarOpen={sidebarOpen}
+              onToggleSidebar={() => {
+                setExperienceMode('places');
+                setSidebarOpen(current => !current);
+              }}
               onSetRoute={value => {
                 setSelectedFeatureId(null);
                 setContextLayers(emptyContextLayers());

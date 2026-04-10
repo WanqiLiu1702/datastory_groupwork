@@ -93,7 +93,7 @@ body {
 
 .hero-kicker,
 .hero-route-kicker {
-  color: var(--muted);
+  color: #33514d;
   font-family: 'Helvetica Neue', Arial, sans-serif;
   font-size: 11px;
   font-weight: 700;
@@ -112,7 +112,7 @@ body {
 .hero-lead {
   max-width: 62ch;
   margin: 0;
-  color: #334745;
+  color: #1e322f;
   font-family: 'Helvetica Neue', Arial, sans-serif;
   font-size: 17px;
   line-height: 1.6;
@@ -128,7 +128,7 @@ body {
 
 .hero-method-inline p {
   margin: 6px 0 0;
-  color: #415552;
+  color: #243734;
   font-family: 'Helvetica Neue', Arial, sans-serif;
   font-size: 13px;
   line-height: 1.5;
@@ -195,7 +195,7 @@ body {
 .hero-stat span {
   display: block;
   margin-top: 6px;
-  color: var(--muted);
+  color: #36504d;
   font-family: 'Helvetica Neue', Arial, sans-serif;
   font-size: 12px;
   line-height: 1.3;
@@ -252,7 +252,7 @@ body {
 
 .hero-menu-card p {
   margin: 0;
-  color: #4d615d;
+  color: #223633;
   font-family: 'Helvetica Neue', Arial, sans-serif;
   font-size: 13px;
   line-height: 1.5;
@@ -260,7 +260,7 @@ body {
 
 .hero-menu-meta {
   margin-top: auto;
-  color: var(--accent);
+  color: #244945;
   font-family: 'Helvetica Neue', Arial, sans-serif;
   font-size: 11px;
   font-weight: 700;
@@ -393,6 +393,14 @@ body {
   display: none;
 }
 
+.app.app-sidebar-collapsed {
+  grid-template-columns: 132px 1fr;
+}
+
+.app.app-sidebar-collapsed .sidebar {
+  display: none;
+}
+
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -413,6 +421,10 @@ body {
 }
 
 .sidebar-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
   padding: 24px 24px 16px;
   border-bottom: 1px solid var(--border);
 }
@@ -430,6 +442,17 @@ body {
   font-size: 12px;
   line-height: 1.45;
   max-width: 250px;
+}
+
+.sidebar-close {
+  padding: 8px 12px;
+  border: 1px solid rgba(47, 63, 58, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--accent);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12px;
+  cursor: pointer;
 }
 
 .notice {

@@ -17,6 +17,8 @@ export default function Sidebar({
   boroughOptions,
   boroughRanking,
   categoryRanking,
+  sidebarOpen,
+  onClose,
   onOpenPlaces,
   onOpenRoutes
 }) {
@@ -68,8 +70,15 @@ export default function Sidebar({
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <h1>Map explorer</h1>
-        <p className="subtitle">Browse places directly or switch into a route-first guide.</p>
+        <div>
+          <h1>Map explorer</h1>
+          <p className="subtitle">Browse places directly or switch into a route-first guide.</p>
+        </div>
+        {sidebarOpen ? (
+          <button type="button" className="sidebar-close" onClick={onClose}>
+            Hide
+          </button>
+        ) : null}
       </div>
 
       <div className="stats-grid panel">

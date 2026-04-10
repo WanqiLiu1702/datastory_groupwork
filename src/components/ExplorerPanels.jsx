@@ -142,6 +142,8 @@ export default function ExplorerPanels({
   routeDirections,
   onActivatePlacesMode,
   onActivateRouteMode,
+  sidebarOpen,
+  onToggleSidebar,
   onSetRoute,
   onSelectFeature
 }) {
@@ -258,6 +260,13 @@ export default function ExplorerPanels({
     <>
       <div className="map-toolbar">
         <div className="floating-toolbar-label">Explore</div>
+        <button
+          type="button"
+          className={'map-toolbar-button' + (sidebarOpen ? ' active' : '')}
+          onClick={() => onToggleSidebar?.()}
+        >
+          Filters
+        </button>
         <button
           type="button"
           className={'map-toolbar-button map-toolbar-button-route' + (activePanel === 'routes' ? ' active' : '')}
