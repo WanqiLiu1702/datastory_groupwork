@@ -1,12 +1,12 @@
 :root {
-  --bg: #f5f0e6;
-  --panel: #fffdf8;
-  --ink: #161616;
-  --muted: #6b6357;
-  --accent: #264b43;
-  --accent-soft: #e3efe9;
-  --warm: #a44a3f;
-  --border: #d8cfbc;
+  --bg: #f1f6f2;
+  --panel: #fcfefc;
+  --ink: #17302d;
+  --muted: #62736d;
+  --accent: #2f6d67;
+  --accent-soft: #e2f2ee;
+  --warm: #6f9fbe;
+  --border: #d8e4de;
   --score-1: #c65146;
   --score-2: #dd8d59;
   --score-3: #ccb45c;
@@ -26,8 +26,8 @@ body,
   height: 100%;
   font-family: Georgia, 'Times New Roman', serif;
   background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.85), transparent 28%),
-    linear-gradient(180deg, #f7f2e9 0%, #f2ebdf 100%);
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.88), transparent 28%),
+    linear-gradient(180deg, #f6fbf8 0%, #edf5f1 100%);
   color: var(--ink);
 }
 
@@ -50,7 +50,7 @@ body {
   overflow-y: auto;
   border-right: 1px solid var(--border);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 243, 233, 0.98)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(241, 247, 244, 0.98)),
     var(--panel);
   backdrop-filter: blur(10px);
 }
@@ -206,7 +206,7 @@ body {
   position: absolute;
   inset: 0 auto 0 0;
   border-radius: 999px;
-  background: linear-gradient(90deg, #d68b72, #6f8db0);
+  background: linear-gradient(90deg, #81c5b5, #8eb6d8);
 }
 
 .ranking-item.active .ranking-label,
@@ -220,7 +220,7 @@ body {
 }
 
 .ranking-item.active .ranking-bar-fill {
-  background: linear-gradient(90deg, #355f5b, #7ba08b);
+  background: linear-gradient(90deg, #3c8d85, #6ca7be);
 }
 
 .panel-sources {
@@ -614,7 +614,7 @@ body {
   top: 68px;
   right: 18px;
   z-index: 690;
-  width: min(390px, calc(100% - 36px));
+  width: min(460px, calc(100% - 36px));
   max-height: calc(100vh - 140px);
   border: 1px solid rgba(47, 63, 58, 0.14);
   border-radius: 22px;
@@ -692,6 +692,133 @@ body {
 
 .route-card-large {
   margin-top: 12px;
+}
+
+.route-detail-card {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(47, 109, 103, 0.16);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(226, 242, 238, 0.92), rgba(255, 255, 255, 0.94));
+}
+
+.route-detail-head h3 {
+  margin: 4px 0 6px;
+  color: var(--accent);
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.route-detail-head p {
+  margin: 0;
+  color: var(--muted);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.route-detail-kicker,
+.route-detail-label {
+  color: var(--muted);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.route-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.route-detail-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid rgba(47, 109, 103, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.route-detail-stat strong {
+  color: var(--accent);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.route-detail-stat span {
+  color: var(--muted);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.route-detail-section {
+  margin-top: 14px;
+}
+
+.route-stop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.route-stop {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(47, 109, 103, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.86);
+  cursor: pointer;
+  text-align: left;
+}
+
+.route-stop:hover {
+  border-color: rgba(47, 109, 103, 0.28);
+}
+
+.route-stop-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(47, 109, 103, 0.12);
+  color: var(--accent);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.route-stop-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.route-stop-copy strong {
+  color: var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.route-stop-copy span {
+  color: var(--muted);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.35;
 }
 
 .route-swatch-neutral {

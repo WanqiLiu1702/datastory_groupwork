@@ -5,6 +5,7 @@ import {
   CAT_LABELS,
   CONTEXT_LABELS,
   OPENING_LABELS,
+  ROUTE_COLORS,
   TOURISM_TYPE_COLORS,
   TOURISM_TYPE_LABELS
 } from '../constants.js';
@@ -469,7 +470,7 @@ export default function HeritageMap({
 
     if (route !== 'all' && features.length > 1) {
       lineRef.current = L.polyline(orderedLatLngs(features), {
-        color: routeDefs[route]?.color || '#2b4a3f',
+        color: ROUTE_COLORS[route] || routeDefs[route]?.color || '#2b4a3f',
         weight: 4,
         opacity: 0.65,
         dashArray: '8 8'

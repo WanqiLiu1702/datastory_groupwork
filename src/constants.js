@@ -69,3 +69,14 @@ export const TOURISM_TYPE_COLORS = {
   museum: '#8a6f58',
   viewpoint: '#7a9b6a'
 };
+
+export const ROUTE_COLORS = {
+  bloomsbury_backstreets: '#7bb5ad',
+  west_london_creatives: '#e7a27c',
+  civic_voices: '#83a6cf',
+  garden_suburb_retreats: '#93be8b',
+  literary_lives_walk: '#d99696',
+  riverside_quiet_edge: '#72b8c5',
+  parkside_pause: '#8dcf9b',
+  step_free_starter: '#91b7c5'
+};

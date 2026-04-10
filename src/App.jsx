@@ -241,6 +241,7 @@ export default function App() {
           activePanel={activePanel}
           setActivePanel={setActivePanel}
           visibleFeatures={visible}
+          routeSourceFeatures={scopedFeatures}
           routeDefs={dataset.metadata.routes || {}}
           routeCounts={routeCounts}
           activeRoute={filters.route}
