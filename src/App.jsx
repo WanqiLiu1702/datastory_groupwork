@@ -554,25 +554,41 @@ export default function App() {
 
   const openPlacesExplorer = useCallback(() => {
     setExperienceMode('places');
-    setSidebarOpen(false);
+    setSidebarOpen(true);
     setSelectedFeatureId(null);
     setContextLayers(emptyContextLayers());
     setFilters(current => ({ ...current, route: 'all' }));
     setActivePanel(null);
     scrollToExplorer();
+    window.setTimeout(() => {
+      mapApiRef.current?.fitVisible?.();
+    }, 260);
   }, [scrollToExplorer]);
 
   const openRouteGuide = useCallback((personaId = null) => {
     setExperienceMode('routes');
     setSidebarOpen(false);
+    let preferredRoute = 'all';
+    if (personaId) {
+      preferredRoute =
+        Object.entries(dataset.metadata.routes || {}).find(([, route]) =>
+          (route.recommended_for || []).includes(personaId)
+        )?.[0] || 'all';
+    }
     if (personaId) {
       setRouteAudience(personaId);
     }
     setSelectedFeatureId(null);
     setContextLayers(emptyContextLayers());
+    if (personaId) {
+      setFilters(current => ({ ...current, route: preferredRoute }));
+    }
     setActivePanel('routes');
     scrollToExplorer();
-  }, [scrollToExplorer]);
+    window.setTimeout(() => {
+      mapApiRef.current?.fitVisible?.();
+    }, 260);
+  }, [dataset.metadata.routes, scrollToExplorer]);
 
   return (
     <div className="page-shell">

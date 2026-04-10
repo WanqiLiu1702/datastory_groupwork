@@ -408,6 +408,19 @@ export default function HeritageMap({
             showAccessRing(map, marker.getLatLng());
             marker.openPopup();
           }
+        },
+        fitVisible() {
+          if (lineRef.current && lineRef.current.getBounds().isValid()) {
+            map.fitBounds(lineRef.current.getBounds(), { padding: [40, 40] });
+            return;
+          }
+          if (layerRef.current && layerRef.current.getBounds().isValid()) {
+            map.fitBounds(layerRef.current.getBounds(), { padding: [40, 40], maxZoom: 13 });
+            return;
+          }
+          if (boundaryRef.current && boundaryRef.current.getBounds().isValid()) {
+            map.fitBounds(boundaryRef.current.getBounds(), { padding: [32, 32] });
+          }
         }
       });
     }
