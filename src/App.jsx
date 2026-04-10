@@ -146,6 +146,17 @@ function buildRouteLegs(features) {
   }));
 }
 
+function isValidRouteCoordinate(value) {
+  return (
+    Array.isArray(value) &&
+    value.length >= 2 &&
+    Number.isFinite(value[0]) &&
+    Number.isFinite(value[1]) &&
+    Math.abs(value[1]) <= 90 &&
+    Math.abs(value[0]) <= 180
+  );
+}
+
 function stepStreetName(step) {
   return step?.name || step?.ref || 'the next street';
 }
@@ -406,6 +417,14 @@ export default function App() {
           throw new Error('No route geometry returned');
         }
 
+        const safeCoordinates = route.geometry.coordinates
+          .filter(isValidRouteCoordinate)
+          .map(([lon, lat]) => [lat, lon]);
+
+        if (safeCoordinates.length < 2) {
+          throw new Error('Returned route geometry was invalid');
+        }
+
         const steps = (leg.steps || [])
           .filter(step => step?.maneuver?.type !== 'arrive')
           .map(step => ({
@@ -418,7 +437,7 @@ export default function App() {
         setRouteDirections({
           status: 'ready',
           data: {
-            coordinates: route.geometry.coordinates.map(([lon, lat]) => [lat, lon]),
+            coordinates: safeCoordinates,
             distanceM: Math.round(route.distance || 0),
             durationMin: Math.max(1, Math.round((route.duration || 0) / 60)),
             steps

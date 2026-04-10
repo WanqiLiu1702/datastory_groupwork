@@ -160,6 +160,33 @@ function offsetLatLng(lat, lon, eastMeters = 0, northMeters = 0) {
   return [lat + latOffset, lon + lonOffset];
 }
 
+function isValidLatLngPair(value) {
+  return (
+    Array.isArray(value) &&
+    value.length >= 2 &&
+    Number.isFinite(value[0]) &&
+    Number.isFinite(value[1]) &&
+    Math.abs(value[0]) <= 90 &&
+    Math.abs(value[1]) <= 180
+  );
+}
+
+function sanitizeRouteLatLngs(routeDirections, routeLeg, features) {
+  const routed = (routeDirections?.coordinates || []).filter(isValidLatLngPair);
+  if (routed.length >= 2) return routed;
+
+  if (routeLeg) {
+    const direct = [
+      [routeLeg.from.geometry.coordinates[1], routeLeg.from.geometry.coordinates[0]],
+      [routeLeg.to.geometry.coordinates[1], routeLeg.to.geometry.coordinates[0]]
+    ].filter(isValidLatLngPair);
+    if (direct.length >= 2) return direct;
+  }
+
+  const ordered = orderedLatLngs(features).filter(isValidLatLngPair);
+  return ordered;
+}
+
 export default function HeritageMap({
   features,
   route,
@@ -482,38 +509,41 @@ export default function HeritageMap({
 
     if (route !== 'all' && features.length > 1) {
       const routeColor = ROUTE_COLORS[route] || routeDefs[route]?.color || '#2b4a3f';
-      const routeLatLngs =
-        routeDirections?.coordinates?.length
-          ? routeDirections.coordinates
-          : routeLeg
-            ? [
-                [routeLeg.from.geometry.coordinates[1], routeLeg.from.geometry.coordinates[0]],
-                [routeLeg.to.geometry.coordinates[1], routeLeg.to.geometry.coordinates[0]]
-              ]
-            : orderedLatLngs(features);
+      const routeLatLngs = sanitizeRouteLatLngs(routeDirections, routeLeg, features);
 
-      lineRef.current = L.layerGroup();
-      L.polyline(routeLatLngs, {
-        color: 'rgba(255,255,255,0.92)',
-        weight: 10,
-        opacity: 0.92,
-        lineCap: 'round',
-        lineJoin: 'round'
-      }).addTo(lineRef.current);
-      L.polyline(routeLatLngs, {
-        color: routeColor,
-        weight: 5,
-        opacity: 0.82,
-        dashArray: '10 8',
-        lineCap: 'round',
-        lineJoin: 'round',
-        className: 'route-flow-line'
-      }).addTo(lineRef.current);
-      lineRef.current.addTo(map);
+      if (routeLatLngs.length >= 2) {
+        try {
+          lineRef.current = L.layerGroup();
+          L.polyline(routeLatLngs, {
+            color: 'rgba(255,255,255,0.92)',
+            weight: 10,
+            opacity: 0.92,
+            lineCap: 'round',
+            lineJoin: 'round'
+          }).addTo(lineRef.current);
+          L.polyline(routeLatLngs, {
+            color: routeColor,
+            weight: 5,
+            opacity: 0.82,
+            dashArray: '10 8',
+            lineCap: 'round',
+            lineJoin: 'round',
+            className: 'route-flow-line'
+          }).addTo(lineRef.current);
+          lineRef.current.addTo(map);
+        } catch (error) {
+          console.error('Failed to draw route line', error);
+          if (lineRef.current) {
+            map.removeLayer(lineRef.current);
+            lineRef.current = null;
+          }
+        }
+      }
 
       if (routeStationMarkers?.length) {
         const stationLayer = L.layerGroup();
         for (const station of routeStationMarkers) {
+          if (!Number.isFinite(station.lat) || !Number.isFinite(station.lon)) continue;
           const marker = L.marker([station.lat, station.lon], {
             icon: L.divIcon({
               className: '',
@@ -535,7 +565,11 @@ export default function HeritageMap({
         routeStationRef.current = stationLayer;
       }
 
-      map.fitBounds(lineRef.current.getBounds(), { padding: [40, 40] });
+      if (lineRef.current && lineRef.current.getBounds().isValid()) {
+        map.fitBounds(lineRef.current.getBounds(), { padding: [40, 40] });
+      } else {
+        map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 13 });
+      }
     } else {
       map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 13 });
     }

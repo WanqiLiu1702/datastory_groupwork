@@ -111,6 +111,11 @@ export default function ExplorerPanels({
   onSelectFeature
 }) {
   const [routeAudience, setRouteAudience] = useState(PERSONAS[0].id);
+  const routeState = routeDirections || {
+    status: 'idle',
+    data: null,
+    error: null
+  };
   const routeEntries = Object.entries(routeDefs);
   const availableRouteCount = useMemo(() => {
     return Object.keys(routeCounts).length || routeEntries.length;
@@ -195,13 +200,13 @@ export default function ExplorerPanels({
     setRouteLegIndex(clamped);
   };
 
-  const streetStepList = routeDirections?.data?.steps?.slice(0, 6) || [];
+  const streetStepList = routeState.data?.steps?.slice(0, 6) || [];
   const routeHeadline =
-    routeDirections.status === 'ready'
-      ? `${routeDirections.data.durationMin} min walk · ${routeDirections.data.distanceM}m`
-      : routeDirections.status === 'loading'
+    routeState.status === 'ready'
+      ? `${routeState.data.durationMin} min walk · ${routeState.data.distanceM}m`
+      : routeState.status === 'loading'
         ? 'Finding street-level walking route…'
-        : routeDirections.status === 'error'
+        : routeState.status === 'error'
           ? 'Street routing unavailable right now. Showing a direct preview line.'
           : 'Select a route leg to preview the walking path.';
 
@@ -412,7 +417,7 @@ export default function ExplorerPanels({
                                 {routeHeadline}
                               </span>
                             </div>
-                            {routeDirections.status === 'ready' && streetStepList.length ? (
+                            {routeState.status === 'ready' && streetStepList.length ? (
                               <div className="route-turn-list">
                                 {streetStepList.map((step, index) => (
                                   <div key={`${step.instruction}-${index}`} className="route-turn-item">
