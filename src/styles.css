@@ -1438,6 +1438,51 @@ body {
   height: 100%;
 }
 
+.map-wheel-toggle {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  z-index: 670;
+  padding: 10px 14px;
+  border: 1px solid rgba(47, 63, 58, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.94);
+  color: #315854;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(23, 48, 45, 0.08);
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.map-wheel-toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(47, 109, 103, 0.24);
+}
+
+.map-wheel-toggle.active {
+  background: linear-gradient(135deg, #2f6d67, #54938b);
+  border-color: rgba(47, 109, 103, 0.44);
+  color: #fff;
+}
+
+.map-wheel-hint {
+  position: absolute;
+  right: 18px;
+  bottom: 64px;
+  z-index: 668;
+  max-width: 240px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.92);
+  color: #556763;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  box-shadow: 0 12px 22px rgba(23, 48, 45, 0.06);
+}
+
 .map-toolbar {
   position: absolute;
   top: 18px;
@@ -2432,6 +2477,17 @@ body {
 
   .map-container {
     height: 52vh;
+  }
+
+  .map-wheel-toggle {
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .map-wheel-hint {
+    right: 12px;
+    bottom: 56px;
+    max-width: 180px;
   }
 
   .sidebar {

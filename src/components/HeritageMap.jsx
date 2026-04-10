@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import {
   CAT_COLORS,
@@ -220,6 +220,7 @@ export default function HeritageMap({
   const contextLayerRef = useRef(null);
   const markerByIdRef = useRef({});
   const siteContextRef = useRef(siteContextById);
+  const [wheelZoomEnabled, setWheelZoomEnabled] = useState(false);
 
   useEffect(() => {
     siteContextRef.current = siteContextById;
@@ -382,7 +383,7 @@ export default function HeritageMap({
 
     const map = L.map(containerRef.current, {
       zoomControl: false,
-      scrollWheelZoom: true
+      scrollWheelZoom: false
     }).setView([51.515, -0.13], 11);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -433,6 +434,17 @@ export default function HeritageMap({
       });
     }
   }, [onClearSelection, onMapReady]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (wheelZoomEnabled) {
+      map.scrollWheelZoom.enable();
+    } else {
+      map.scrollWheelZoom.disable();
+    }
+  }, [wheelZoomEnabled]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -616,5 +628,19 @@ export default function HeritageMap({
     renderContextLayers(map, selectedFeature, selectedSiteContext, activeContextLayers);
   }, [activeContextLayers, selectedFeature, selectedSiteContext]);
 
-  return <div ref={containerRef} className="map-container" />;
+  return (
+    <>
+      <div ref={containerRef} className="map-container" />
+      <button
+        type="button"
+        className={'map-wheel-toggle' + (wheelZoomEnabled ? ' active' : '')}
+        onClick={() => setWheelZoomEnabled(current => !current)}
+      >
+        {wheelZoomEnabled ? 'Wheel zoom on' : 'Wheel zoom off'}
+      </button>
+      <div className="map-wheel-hint">
+        Scroll page by default. Use +/- or turn wheel zoom on only when needed.
+      </div>
+    </>
+  );
 }
