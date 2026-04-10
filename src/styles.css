@@ -64,22 +64,28 @@ body {
 }
 
 .intro-map {
-  background:
-    radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.8), transparent 20%),
-    radial-gradient(circle at 82% 24%, rgba(226, 239, 233, 0.82), transparent 24%),
-    linear-gradient(180deg, #f5faf7 0%, #edf4ef 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.intro-map .leaflet-pane,
+.intro-map .leaflet-control-container,
+.intro-map .leaflet-top,
+.intro-map .leaflet-bottom {
+  z-index: 0 !important;
 }
 
 .hero-scrim {
   background:
-    linear-gradient(180deg, rgba(246, 251, 248, 0.3) 0%, rgba(246, 251, 248, 0.18) 26%, rgba(237, 245, 241, 0.42) 100%),
-    linear-gradient(90deg, rgba(246, 251, 248, 0.3) 0%, rgba(246, 251, 248, 0.08) 48%, rgba(246, 251, 248, 0.24) 100%);
+    linear-gradient(180deg, rgba(246, 251, 248, 0.58) 0%, rgba(246, 251, 248, 0.42) 26%, rgba(237, 245, 241, 0.56) 100%),
+    linear-gradient(90deg, rgba(246, 251, 248, 0.72) 0%, rgba(246, 251, 248, 0.2) 48%, rgba(246, 251, 248, 0.62) 100%);
   z-index: 1;
+  pointer-events: none;
 }
 
 .hero-content {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   width: min(1360px, 100%);
   display: grid;
   grid-template-columns: minmax(0, 1.02fr) minmax(420px, 0.98fr);
@@ -91,7 +97,7 @@ body {
 .hero-menu {
   border: 1px solid rgba(47, 63, 58, 0.12);
   border-radius: 28px;
-  background: rgba(255, 253, 248, 0.985);
+  background: rgba(255, 253, 248, 0.96);
   box-shadow: 0 24px 56px rgba(31, 42, 38, 0.12);
   backdrop-filter: blur(14px);
 }
@@ -332,7 +338,7 @@ body {
 
 .hero-scroll-row {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   bottom: 18px;
   left: 50%;
   display: flex;
@@ -685,20 +691,20 @@ body {
 .mix-rail-label {
   position: absolute;
   left: 58px;
-  width: 108px;
+  width: 96px;
   font-family: 'Helvetica Neue', Arial, sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.2px;
   white-space: normal;
   line-height: 1.05;
-  transform: translateY(-50%) rotate(24deg);
+  transform: translateY(-50%) rotate(18deg);
   transform-origin: left center;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .mix-rail-label.compact {
-  font-size: 9px;
+  font-size: 8px;
 }
 
 .story-shell {
@@ -731,7 +737,7 @@ body {
 }
 
 .about-header h2 {
-  font-size: clamp(26px, 3vw, 34px);
+  font-size: clamp(22px, 2.4vw, 30px);
 }
 
 .story-copy p,
