@@ -3,6 +3,8 @@ import Sidebar from './components/Sidebar.jsx';
 import HeritageMap from './components/HeritageMap.jsx';
 import ExplorerPanels from './components/ExplorerPanels.jsx';
 import ContextSummary from './components/ContextSummary.jsx';
+import HeroLanding from './components/HeroLanding.jsx';
+import { CAT_LABELS, ROUTE_PERSONAS } from './constants.js';
 
 function matchesHiddenFilter(feature, hidden) {
   const props = feature.properties;
@@ -257,12 +259,14 @@ export default function App() {
   const [contextLayers, setContextLayers] = useState(emptyContextLayers);
   const [routeStopLimit, setRouteStopLimit] = useState(4);
   const [routeLegIndex, setRouteLegIndex] = useState(0);
+  const [routeAudience, setRouteAudience] = useState(ROUTE_PERSONAS[0].id);
   const [routeDirections, setRouteDirections] = useState({
     status: 'idle',
     data: null,
     error: null
   });
   const mapApiRef = useRef(null);
+  const explorerRef = useRef(null);
 
   const handleFeatureSelect = useCallback(id => {
     setSelectedFeatureId(id);
@@ -341,6 +345,16 @@ export default function App() {
     return countsByRoute;
   }, [scopedFeatures]);
 
+  const routePersonaCounts = useMemo(() => {
+    const countsByPersona = Object.fromEntries(ROUTE_PERSONAS.map(persona => [persona.id, 0]));
+    for (const route of Object.values(dataset.metadata.routes || {})) {
+      for (const persona of route.recommended_for || []) {
+        countsByPersona[persona] = (countsByPersona[persona] || 0) + 1;
+      }
+    }
+    return countsByPersona;
+  }, [dataset.metadata.routes]);
+
   const visible = useMemo(() => {
     const filtered = dataset.features.filter(feature => matchesFilters(feature, filters));
     if (filters.route === 'all') return filtered;
@@ -360,6 +374,19 @@ export default function App() {
       feature => feature.properties.category
     );
   }, [dataset, filters]);
+
+  const categoryComposition = useMemo(() => {
+    const countsByCategory = new Map();
+    for (const feature of visible) {
+      const key = feature.properties.category;
+      countsByCategory.set(key, (countsByCategory.get(key) || 0) + 1);
+    }
+
+    return Object.keys(CAT_LABELS).map(key => ({
+      key,
+      count: countsByCategory.get(key) || 0
+    }));
+  }, [visible]);
 
   const routeStationMarkers = useMemo(() => {
     if (filters.route === 'all') return [];
@@ -500,108 +527,146 @@ export default function App() {
     return () => controller.abort();
   }, [filters.route, visible]);
 
+  const heroFeatures = useMemo(() => {
+    const quiet = dataset.features.filter(feature => feature.properties.hidden_quiet).slice(0, 42);
+    if (quiet.length) return quiet;
+    return dataset.features.slice(0, 42);
+  }, [dataset.features]);
+
+  const scrollToExplorer = useCallback(() => {
+    explorerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
+  const openRouteGuide = useCallback(() => {
+    setSelectedFeatureId(null);
+    setContextLayers(emptyContextLayers());
+    setActivePanel('routes');
+    scrollToExplorer();
+  }, [scrollToExplorer]);
+
   return (
-    <div className="app">
-      <Sidebar
+    <div className="page-shell">
+      <HeroLanding
+        boundary={boundary}
+        heroFeatures={heroFeatures}
         counts={counts}
-        filters={filters}
-        setFilters={setFilters}
-        boroughOptions={boroughOptions}
-        boroughRanking={boroughRanking}
-        categoryRanking={categoryRanking}
+        routeDefs={dataset.metadata.routes || {}}
+        routeAudience={routeAudience}
+        routePersonaCounts={routePersonaCounts}
+        onChoosePersona={setRouteAudience}
+        onExploreMap={scrollToExplorer}
+        onOpenRoutes={openRouteGuide}
       />
-      <div className="map-shell">
-        <HeritageMap
-          features={visible}
-          route={filters.route}
-          routeDefs={dataset.metadata.routes || {}}
-          routeLeg={activeRouteLeg}
-          routeDirections={routeDirections.data}
-          boundary={boundary}
-          boroughBoundaries={boroughBoundaries}
-          activeBorough={normalizeBoroughName(filters.borough)}
-          routeStationMarkers={routeStationMarkers}
-          selectedFeature={selectedFeature}
-          selectedSiteContext={selectedSiteContext}
-          siteContextById={siteContext.features || {}}
-          activeContextLayers={contextLayers}
-          onFeatureSelect={handleFeatureSelect}
-          onClearSelection={handleClearSelection}
-          onMapReady={handleMapReady}
-        />
-        <ExplorerPanels
-          activePanel={activePanel}
-          setActivePanel={setActivePanel}
-          visibleFeatures={visible}
-          routeSourceFeatures={scopedFeatures}
-          routeDefs={dataset.metadata.routes || {}}
-          routeCounts={routeCounts}
-          activeRoute={filters.route}
-          routeStopLimit={routeStopLimit}
-          setRouteStopLimit={setRouteStopLimit}
-          routeLegIndex={routeLegIndex}
-          setRouteLegIndex={setRouteLegIndex}
-          routeDirections={routeDirections}
-          onSetRoute={value => {
-            setSelectedFeatureId(null);
-            setContextLayers(emptyContextLayers());
-            setFilters(current => ({ ...current, route: value }));
-          }}
-          onSelectFeature={id => {
-            setSelectedFeatureId(id);
-            mapApiRef.current && mapApiRef.current.focusFeature(id);
-          }}
-        />
-        {selectedFeature ? (
-          <>
-            <div className="context-toolbar">
-              <div className="floating-toolbar-label">Context Layers</div>
-              <button
-                type="button"
-                className="context-toggle context-toggle-master"
-                onClick={() =>
-                  setContextLayers(current => {
-                    const shouldEnableAll = !Object.values(current).every(Boolean);
-                    return {
-                      tourism: shouldEnableAll,
-                      green: shouldEnableAll,
-                      water: shouldEnableAll,
-                      roads: shouldEnableAll
-                    };
-                  })
-                }
-              >
-                {Object.values(contextLayers).every(Boolean) ? 'Hide all' : 'Show all'}
-              </button>
-              {[
-                ['tourism', 'OSM tourism'],
-                ['green', 'Green space'],
-                ['water', 'Water'],
-                ['roads', 'Major roads']
-              ].map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={'context-toggle' + (contextLayers[key] ? ' active' : '')}
-                  onClick={() => setContextLayers(current => ({ ...current, [key]: !current[key] }))}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <ContextSummary
+
+      <section ref={explorerRef} className="explorer-section">
+        <div className="app">
+          <Sidebar
+            counts={counts}
+            filters={filters}
+            setFilters={setFilters}
+            boroughOptions={boroughOptions}
+            boroughRanking={boroughRanking}
+            categoryRanking={categoryRanking}
+            categoryComposition={categoryComposition}
+            visibleCount={visible.length}
+            onOpenRoutes={openRouteGuide}
+          />
+          <div className="map-shell">
+            <HeritageMap
+              features={visible}
+              route={filters.route}
+              routeDefs={dataset.metadata.routes || {}}
+              routeLeg={activeRouteLeg}
+              routeDirections={routeDirections.data}
+              boundary={boundary}
+              boroughBoundaries={boroughBoundaries}
+              activeBorough={normalizeBoroughName(filters.borough)}
+              routeStationMarkers={routeStationMarkers}
               selectedFeature={selectedFeature}
               selectedSiteContext={selectedSiteContext}
+              siteContextById={siteContext.features || {}}
               activeContextLayers={contextLayers}
+              onFeatureSelect={handleFeatureSelect}
+              onClearSelection={handleClearSelection}
+              onMapReady={handleMapReady}
             />
-            <div className="range-legend">
-              <strong>{selectedFeature.properties.name}</strong>
-              <span>10 and 20 minute dashed rings show approximate walking catchments.</span>
-              <span className="range-legend-note">Context buttons reveal nearby tourism, green, water and major-road cues.</span>
-            </div>
-          </>
-        ) : null}
-      </div>
+            <ExplorerPanels
+              activePanel={activePanel}
+              setActivePanel={setActivePanel}
+              visibleFeatures={visible}
+              routeSourceFeatures={scopedFeatures}
+              routeDefs={dataset.metadata.routes || {}}
+              routeCounts={routeCounts}
+              activeRoute={filters.route}
+              routeStopLimit={routeStopLimit}
+              setRouteStopLimit={setRouteStopLimit}
+              routeLegIndex={routeLegIndex}
+              setRouteLegIndex={setRouteLegIndex}
+              routeAudience={routeAudience}
+              setRouteAudience={setRouteAudience}
+              routeDirections={routeDirections}
+              onSetRoute={value => {
+                setSelectedFeatureId(null);
+                setContextLayers(emptyContextLayers());
+                setFilters(current => ({ ...current, route: value }));
+              }}
+              onSelectFeature={id => {
+                setSelectedFeatureId(id);
+                mapApiRef.current && mapApiRef.current.focusFeature(id);
+              }}
+            />
+            {selectedFeature ? (
+              <>
+                <div className="context-toolbar">
+                  <div className="floating-toolbar-label">Context Layers</div>
+                  <button
+                    type="button"
+                    className="context-toggle context-toggle-master"
+                    onClick={() =>
+                      setContextLayers(current => {
+                        const shouldEnableAll = !Object.values(current).every(Boolean);
+                        return {
+                          tourism: shouldEnableAll,
+                          green: shouldEnableAll,
+                          water: shouldEnableAll,
+                          roads: shouldEnableAll
+                        };
+                      })
+                    }
+                  >
+                    {Object.values(contextLayers).every(Boolean) ? 'Hide all' : 'Show all'}
+                  </button>
+                  {[
+                    ['tourism', 'OSM tourism'],
+                    ['green', 'Green space'],
+                    ['water', 'Water'],
+                    ['roads', 'Major roads']
+                  ].map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className={'context-toggle' + (contextLayers[key] ? ' active' : '')}
+                      onClick={() => setContextLayers(current => ({ ...current, [key]: !current[key] }))}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <ContextSummary
+                  selectedFeature={selectedFeature}
+                  selectedSiteContext={selectedSiteContext}
+                  activeContextLayers={contextLayers}
+                />
+                <div className="range-legend">
+                  <strong>{selectedFeature.properties.name}</strong>
+                  <span>10 and 20 minute dashed rings show approximate walking catchments.</span>
+                  <span className="range-legend-note">Context buttons reveal nearby tourism, green, water and major-road cues.</span>
+                </div>
+              </>
+            ) : null}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

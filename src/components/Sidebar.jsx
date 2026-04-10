@@ -1,5 +1,6 @@
 import React from 'react';
 import RankingPanel from './RankingPanel.jsx';
+import CategoryMixPanel from './CategoryMixPanel.jsx';
 import {
   CAT_COLORS,
   CAT_LABELS,
@@ -15,7 +16,10 @@ export default function Sidebar({
   setFilters,
   boroughOptions,
   boroughRanking,
-  categoryRanking
+  categoryRanking,
+  categoryComposition,
+  visibleCount,
+  onOpenRoutes
 }) {
   const setHidden = value => setFilters(current => ({ ...current, hidden: value, route: 'all' }));
   const setType = value =>
@@ -65,8 +69,8 @@ export default function Sidebar({
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <h1>GemMap</h1>
-        <p className="subtitle">London’s Hidden Heritage Beyond Guidebooks</p>
+        <h1>Map explorer</h1>
+        <p className="subtitle">Filter places directly or jump into the dedicated route guide.</p>
       </div>
 
       <div className="stats-grid panel">
@@ -83,6 +87,18 @@ export default function Sidebar({
           <strong>{counts.quiet}</strong>
         </div>
       </div>
+
+      <div className="panel route-launch-panel">
+        <div>
+          <h2>Route guide</h2>
+          <p className="panel-note">Switch from point browsing to persona-led guided walks.</p>
+        </div>
+        <button type="button" className="route-launch-button" onClick={onOpenRoutes}>
+          Open route guide
+        </button>
+      </div>
+
+      <CategoryMixPanel items={categoryComposition} total={visibleCount} />
 
       <div className="panel">
         <h2>Hidden definition</h2>

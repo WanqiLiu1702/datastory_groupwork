@@ -80,3 +80,27 @@ export const ROUTE_COLORS = {
   parkside_pause: '#8dcf9b',
   step_free_starter: '#91b7c5'
 };
+
+export const ROUTE_PERSONAS = [
+  {
+    id: 'Quiet Cultural Seeker',
+    title: 'Quiet Cultural Seeker',
+    shortLabel: 'Quiet',
+    description: 'Looks for calm, reflective and inspiring heritage spaces away from crowded tourist areas.',
+    accent: '#7bb5ad'
+  },
+  {
+    id: 'Experienced London Visitor',
+    title: 'Experienced London Visitor',
+    shortLabel: 'Deeper London',
+    description: 'Has already seen major landmarks and wants deeper, less-promoted cultural places.',
+    accent: '#83a6cf'
+  },
+  {
+    id: 'Community Heritage Advocate',
+    title: 'Community Heritage Advocate',
+    shortLabel: 'Advocate',
+    description: 'Wants to surface culturally valuable but under-recognised places in local heritage discussions.',
+    accent: '#e7a27c'
+  }
+];

@@ -1,24 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import ResultList from './ResultList.jsx';
-import { CAT_LABELS, ROUTE_COLORS } from '../constants.js';
-
-const PERSONAS = [
-  {
-    id: 'Quiet Cultural Seeker',
-    title: 'Quiet Cultural Seeker',
-    description: 'Looks for calm, reflective and inspiring heritage spaces away from crowded tourist areas.'
-  },
-  {
-    id: 'Experienced London Visitor',
-    title: 'Experienced London Visitor',
-    description: 'Has already seen major landmarks and wants deeper, less-promoted cultural places.'
-  },
-  {
-    id: 'Community Heritage Advocate',
-    title: 'Community Heritage Advocate',
-    description: 'Wants to surface culturally valuable but under-recognised places in local heritage discussions.'
-  }
-];
+import { CAT_LABELS, ROUTE_COLORS, ROUTE_PERSONAS } from '../constants.js';
 
 function directionArrow(step) {
   if (!step) return '•';
@@ -155,11 +137,12 @@ export default function ExplorerPanels({
   setRouteStopLimit,
   routeLegIndex,
   setRouteLegIndex,
+  routeAudience,
+  setRouteAudience,
   routeDirections,
   onSetRoute,
   onSelectFeature
 }) {
-  const [routeAudience, setRouteAudience] = useState(PERSONAS[0].id);
   const routeState = routeDirections || {
     status: 'idle',
     data: null,
@@ -241,7 +224,7 @@ export default function ExplorerPanels({
         }))
       : [];
   const currentLeg = currentLegs[Math.min(routeLegIndex, Math.max(currentLegs.length - 1, 0))] || null;
-  const currentPersona = PERSONAS.find(persona => persona.id === routeAudience) || PERSONAS[0];
+  const currentPersona = ROUTE_PERSONAS.find(persona => persona.id === routeAudience) || ROUTE_PERSONAS[0];
 
   const jumpToLeg = nextIndex => {
     if (!currentLegs.length) return;
@@ -272,19 +255,19 @@ export default function ExplorerPanels({
         <div className="floating-toolbar-label">Explore</div>
         <button
           type="button"
+          className={'map-toolbar-button map-toolbar-button-route' + (activePanel === 'routes' ? ' active' : '')}
+          onClick={() => togglePanel('routes')}
+        >
+          Route guide
+          <span>{availableRouteCount}</span>
+        </button>
+        <button
+          type="button"
           className={'map-toolbar-button' + (activePanel === 'results' ? ' active' : '')}
           onClick={() => togglePanel('results')}
         >
           Places list
           <span>{visibleFeatures.length}</span>
-        </button>
-        <button
-          type="button"
-          className={'map-toolbar-button' + (activePanel === 'routes' ? ' active' : '')}
-          onClick={() => togglePanel('routes')}
-        >
-          Route guide
-          <span>{availableRouteCount}</span>
         </button>
       </div>
 
@@ -314,7 +297,7 @@ export default function ExplorerPanels({
               ) : (
                 <div className="route-panel-grid">
                   <div className="route-persona-tabs">
-                    {PERSONAS.map(persona => (
+                    {ROUTE_PERSONAS.map(persona => (
                       <button
                         key={persona.id}
                         type="button"
