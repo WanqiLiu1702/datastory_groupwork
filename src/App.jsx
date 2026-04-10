@@ -138,6 +138,43 @@ function pickRouteStops(features, limit) {
   return picks;
 }
 
+function buildRouteLegs(features) {
+  if (!features || features.length < 2) return [];
+  return features.slice(0, -1).map((from, index) => ({
+    from,
+    to: features[index + 1]
+  }));
+}
+
+function stepStreetName(step) {
+  return step?.name || step?.ref || 'the next street';
+}
+
+function formatRouteInstruction(step) {
+  const maneuver = step?.maneuver || {};
+  const type = maneuver.type || 'continue';
+  const modifier = maneuver.modifier;
+  const street = stepStreetName(step);
+
+  if (type === 'depart') return `Start on ${street}`;
+  if (type === 'arrive') return 'Arrive at the next stop';
+  if (type === 'roundabout') return street === 'the next street' ? 'Take the roundabout' : `Take the roundabout onto ${street}`;
+  if (type === 'merge') return street === 'the next street' ? 'Merge ahead' : `Merge onto ${street}`;
+  if (type === 'end of road') return street === 'the next street' ? 'At the end of the road continue ahead' : `At the end of the road continue onto ${street}`;
+
+  if (modifier) {
+    const action =
+      modifier === 'straight'
+        ? 'Continue'
+        : modifier.charAt(0).toUpperCase() + modifier.slice(1);
+    return street === 'the next street' ? action : `${action} onto ${street}`;
+  }
+
+  return street === 'the next street'
+    ? type.charAt(0).toUpperCase() + type.slice(1)
+    : `${type.charAt(0).toUpperCase() + type.slice(1)} on ${street}`;
+}
+
 function normalizeBoroughName(name = '') {
   return name
     .replace(/^London Borough of /i, '')
@@ -176,6 +213,12 @@ export default function App() {
     roads: false
   });
   const [routeStopLimit, setRouteStopLimit] = useState(4);
+  const [routeLegIndex, setRouteLegIndex] = useState(0);
+  const [routeDirections, setRouteDirections] = useState({
+    status: 'idle',
+    data: null,
+    error: null
+  });
   const mapApiRef = useRef(null);
 
   const handleFeatureSelect = useCallback(id => {
@@ -280,6 +323,16 @@ export default function App() {
     return aggregateRouteStations(visible);
   }, [filters.route, visible]);
 
+  const routeLegs = useMemo(() => {
+    if (filters.route === 'all') return [];
+    return buildRouteLegs(visible);
+  }, [filters.route, visible]);
+
+  const activeRouteLeg = useMemo(() => {
+    if (!routeLegs.length) return null;
+    return routeLegs[Math.min(routeLegIndex, routeLegs.length - 1)] || null;
+  }, [routeLegIndex, routeLegs]);
+
   const selectedFeature = useMemo(() => {
     return dataset.features.find(feature => feature.properties.id === selectedFeatureId) || null;
   }, [dataset.features, selectedFeatureId]);
@@ -297,6 +350,94 @@ export default function App() {
     }
   }, [selectedFeatureId, visible]);
 
+  useEffect(() => {
+    setRouteLegIndex(0);
+  }, [filters.route, routeStopLimit]);
+
+  useEffect(() => {
+    if (!routeLegs.length) {
+      setRouteLegIndex(0);
+      return;
+    }
+    if (routeLegIndex > routeLegs.length - 1) {
+      setRouteLegIndex(routeLegs.length - 1);
+    }
+  }, [routeLegIndex, routeLegs]);
+
+  useEffect(() => {
+    if (filters.route === 'all' || !activeRouteLeg?.to?.properties?.id) return;
+    setSelectedFeatureId(activeRouteLeg.to.properties.id);
+  }, [activeRouteLeg, filters.route]);
+
+  useEffect(() => {
+    if (!activeRouteLeg) {
+      setRouteDirections({
+        status: 'idle',
+        data: null,
+        error: null
+      });
+      return;
+    }
+
+    const controller = new AbortController();
+    const [fromLon, fromLat] = activeRouteLeg.from.geometry.coordinates;
+    const [toLon, toLat] = activeRouteLeg.to.geometry.coordinates;
+    const url =
+      `https://router.project-osrm.org/route/v1/foot/${fromLon},${fromLat};${toLon},${toLat}` +
+      '?overview=full&geometries=geojson&steps=true';
+
+    setRouteDirections({
+      status: 'loading',
+      data: null,
+      error: null
+    });
+
+    fetch(url, { signal: controller.signal })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Routing request failed with ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(payload => {
+        const route = payload?.routes?.[0];
+        const leg = route?.legs?.[0];
+        if (!route?.geometry?.coordinates?.length || !leg) {
+          throw new Error('No route geometry returned');
+        }
+
+        const steps = (leg.steps || [])
+          .filter(step => step?.maneuver?.type !== 'arrive')
+          .map(step => ({
+            instruction: formatRouteInstruction(step),
+            street: stepStreetName(step),
+            distanceM: Math.max(1, Math.round(step.distance || 0)),
+            durationMin: Math.max(1, Math.round((step.duration || 0) / 60))
+          }));
+
+        setRouteDirections({
+          status: 'ready',
+          data: {
+            coordinates: route.geometry.coordinates.map(([lon, lat]) => [lat, lon]),
+            distanceM: Math.round(route.distance || 0),
+            durationMin: Math.max(1, Math.round((route.duration || 0) / 60)),
+            steps
+          },
+          error: null
+        });
+      })
+      .catch(error => {
+        if (controller.signal.aborted) return;
+        setRouteDirections({
+          status: 'error',
+          data: null,
+          error: error.message || 'Routing unavailable'
+        });
+      });
+
+    return () => controller.abort();
+  }, [activeRouteLeg]);
+
   return (
     <div className="app">
       <Sidebar
@@ -312,6 +453,8 @@ export default function App() {
           features={visible}
           route={filters.route}
           routeDefs={dataset.metadata.routes || {}}
+          routeLeg={activeRouteLeg}
+          routeDirections={routeDirections.data}
           boundary={boundary}
           boroughBoundaries={boroughBoundaries}
           activeBorough={normalizeBoroughName(filters.borough)}
@@ -334,6 +477,9 @@ export default function App() {
           activeRoute={filters.route}
           routeStopLimit={routeStopLimit}
           setRouteStopLimit={setRouteStopLimit}
+          routeLegIndex={routeLegIndex}
+          setRouteLegIndex={setRouteLegIndex}
+          routeDirections={routeDirections}
           onSetRoute={value => setFilters(current => ({ ...current, route: value }))}
           onSelectFeature={id => {
             setSelectedFeatureId(id);

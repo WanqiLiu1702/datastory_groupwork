@@ -164,6 +164,8 @@ export default function HeritageMap({
   features,
   route,
   routeDefs,
+  routeLeg,
+  routeDirections,
   boundary,
   boroughBoundaries,
   activeBorough,
@@ -479,13 +481,35 @@ export default function HeritageMap({
     layerRef.current = group;
 
     if (route !== 'all' && features.length > 1) {
-      lineRef.current = L.polyline(orderedLatLngs(features), {
-        color: ROUTE_COLORS[route] || routeDefs[route]?.color || '#2b4a3f',
-        weight: 4,
-        opacity: 0.65,
-        dashArray: '8 8',
+      const routeColor = ROUTE_COLORS[route] || routeDefs[route]?.color || '#2b4a3f';
+      const routeLatLngs =
+        routeDirections?.coordinates?.length
+          ? routeDirections.coordinates
+          : routeLeg
+            ? [
+                [routeLeg.from.geometry.coordinates[1], routeLeg.from.geometry.coordinates[0]],
+                [routeLeg.to.geometry.coordinates[1], routeLeg.to.geometry.coordinates[0]]
+              ]
+            : orderedLatLngs(features);
+
+      lineRef.current = L.layerGroup();
+      L.polyline(routeLatLngs, {
+        color: 'rgba(255,255,255,0.92)',
+        weight: 10,
+        opacity: 0.92,
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(lineRef.current);
+      L.polyline(routeLatLngs, {
+        color: routeColor,
+        weight: 5,
+        opacity: 0.82,
+        dashArray: '10 8',
+        lineCap: 'round',
+        lineJoin: 'round',
         className: 'route-flow-line'
-      }).addTo(map);
+      }).addTo(lineRef.current);
+      lineRef.current.addTo(map);
 
       if (routeStationMarkers?.length) {
         const stationLayer = L.layerGroup();
@@ -515,7 +539,7 @@ export default function HeritageMap({
     } else {
       map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 13 });
     }
-  }, [activeBorough, boroughBoundaries, boundary, features, onFeatureSelect, route, routeDefs, routeStationMarkers]);
+  }, [activeBorough, boroughBoundaries, boundary, features, onFeatureSelect, route, routeDefs, routeDirections, routeLeg, routeStationMarkers]);
 
   useEffect(() => {
     const map = mapRef.current;

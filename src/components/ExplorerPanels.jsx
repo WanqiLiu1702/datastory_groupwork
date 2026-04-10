@@ -104,10 +104,12 @@ export default function ExplorerPanels({
   activeRoute,
   routeStopLimit,
   setRouteStopLimit,
+  routeLegIndex,
+  setRouteLegIndex,
+  routeDirections,
   onSetRoute,
   onSelectFeature
 }) {
-  const [stepIndex, setStepIndex] = useState(0);
   const [routeAudience, setRouteAudience] = useState(PERSONAS[0].id);
   const routeEntries = Object.entries(routeDefs);
   const availableRouteCount = useMemo(() => {
@@ -152,10 +154,6 @@ export default function ExplorerPanels({
   }, [routeEntries, routeSourceFeatures, routeStopLimit]);
 
   useEffect(() => {
-    setStepIndex(0);
-  }, [activeRoute]);
-
-  useEffect(() => {
     if (activeRoute === 'all' || !routeDefs[activeRoute]?.recommended_for?.length) return;
     setRouteAudience(routeDefs[activeRoute].recommended_for[0]);
   }, [activeRoute, routeDefs]);
@@ -167,7 +165,7 @@ export default function ExplorerPanels({
   const selectRoute = routeKey => {
     onSetRoute(routeKey);
     setActivePanel('routes');
-    setStepIndex(0);
+    setRouteLegIndex(0);
     if (routeKey !== 'all' && routeDefs[routeKey]?.recommended_for?.length) {
       setRouteAudience(routeDefs[routeKey].recommended_for[0]);
     }
@@ -181,13 +179,35 @@ export default function ExplorerPanels({
     activeRoute !== 'all' && routeDefs[activeRoute]?.recommended_for?.includes(routeAudience)
       ? routeDetails[activeRoute]
       : null;
-  const currentStep = currentRoute?.stops?.[Math.min(stepIndex, Math.max(currentRoute.stops.length - 1, 0))] || null;
+  const currentLegs =
+    currentRoute?.stops?.length > 1
+      ? currentRoute.stops.slice(0, -1).map((from, index) => ({
+          from,
+          to: currentRoute.stops[index + 1]
+        }))
+      : [];
+  const currentLeg = currentLegs[Math.min(routeLegIndex, Math.max(currentLegs.length - 1, 0))] || null;
   const currentPersona = PERSONAS.find(persona => persona.id === routeAudience) || PERSONAS[0];
 
-  const jumpToStep = nextIndex => {
+  const jumpToLeg = nextIndex => {
+    if (!currentLegs.length) return;
+    const clamped = Math.max(0, Math.min(nextIndex, currentLegs.length - 1));
+    setRouteLegIndex(clamped);
+  };
+
+  const streetStepList = routeDirections?.data?.steps?.slice(0, 6) || [];
+  const routeHeadline =
+    routeDirections.status === 'ready'
+      ? `${routeDirections.data.durationMin} min walk · ${routeDirections.data.distanceM}m`
+      : routeDirections.status === 'loading'
+        ? 'Finding street-level walking route…'
+        : routeDirections.status === 'error'
+          ? 'Street routing unavailable right now. Showing a direct preview line.'
+          : 'Select a route leg to preview the walking path.';
+
+  const jumpToStop = index => {
     if (!currentRoute?.stops?.length) return;
-    const clamped = Math.max(0, Math.min(nextIndex, currentRoute.stops.length - 1));
-    setStepIndex(clamped);
+    const clamped = Math.max(0, Math.min(index, currentRoute.stops.length - 1));
     onSelectFeature(currentRoute.stops[clamped].id);
   };
 
@@ -225,7 +245,7 @@ export default function ExplorerPanels({
                     ? activeRoute !== 'all' && routeDefs[activeRoute]
                       ? `Now showing the ${routeDefs[activeRoute].label} route.`
                       : 'Filtered hidden-heritage places.'
-                    : 'Choose a route to turn the map into a guided walk.'}
+                    : 'Choose a route to turn the map into a guided walk with street-level pathing.'}
                 </p>
               </div>
               <button type="button" className="overlay-close" onClick={() => setActivePanel(null)}>
@@ -363,35 +383,48 @@ export default function ExplorerPanels({
                       <div className="route-detail-section">
                         <div className="route-detail-label">Step-by-step explorer</div>
                         <p className="route-detail-text">
-                          Move through this shorter suggested route one stop at a time and refocus the map sequentially.
+                          Move through each leg of the route and preview the actual walking path between the current pair of stops.
                         </p>
-                        {currentStep ? (
+                        {currentLeg ? (
                           <div className="route-stepper">
                             <div className="route-stepper-head">
                               <span className="route-stepper-pill">
-                                Step {Math.min(stepIndex + 1, routeDetails[activeRoute].stops.length)} / {routeDetails[activeRoute].stops.length}
+                                Leg {Math.min(routeLegIndex + 1, currentLegs.length)} / {currentLegs.length}
                               </span>
                               <div className="route-stepper-actions">
-                                <button type="button" onClick={() => jumpToStep(stepIndex - 1)} disabled={stepIndex === 0}>
+                                <button type="button" onClick={() => jumpToLeg(routeLegIndex - 1)} disabled={routeLegIndex === 0}>
                                   Previous
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => jumpToStep(stepIndex + 1)}
-                                  disabled={stepIndex >= routeDetails[activeRoute].stops.length - 1}
+                                  onClick={() => jumpToLeg(routeLegIndex + 1)}
+                                  disabled={routeLegIndex >= currentLegs.length - 1}
                                 >
                                   Next
                                 </button>
                               </div>
                             </div>
                             <div className="route-stepper-card">
-                              <strong>{currentStep.name}</strong>
+                              <strong>
+                                {currentLeg.from.name} → {currentLeg.to.name}
+                              </strong>
                               <span>
-                                {currentStep.borough}
-                                {currentStep.station ? ` · ${currentStep.station}` : ''}
-                                {Number.isFinite(currentStep.walk) ? ` · ${currentStep.walk} min walk from TfL` : ''}
+                                {routeHeadline}
                               </span>
                             </div>
+                            {routeDirections.status === 'ready' && streetStepList.length ? (
+                              <div className="route-turn-list">
+                                {streetStepList.map((step, index) => (
+                                  <div key={`${step.instruction}-${index}`} className="route-turn-item">
+                                    <span className="route-turn-index">{index + 1}</span>
+                                    <span className="route-turn-copy">
+                                      <strong>{step.instruction}</strong>
+                                      <span>{step.distanceM}m · about {step.durationMin} min</span>
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : null}
                           </div>
                         ) : null}
                       </div>
@@ -404,7 +437,7 @@ export default function ExplorerPanels({
                               key={stop.id}
                               type="button"
                               className="route-stop"
-                              onClick={() => jumpToStep(index)}
+                              onClick={() => jumpToStop(index)}
                             >
                               <span className="route-stop-index">{index + 1}</span>
                               <span className="route-stop-copy">
