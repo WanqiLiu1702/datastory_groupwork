@@ -128,6 +128,7 @@ function pickRouteStops(features, limit) {
 export default function ExplorerPanels({
   activePanel,
   setActivePanel,
+  experienceMode,
   visibleFeatures,
   routeSourceFeatures,
   routeDefs,
@@ -153,6 +154,7 @@ export default function ExplorerPanels({
     error: null
   };
   const routeEntries = Object.entries(routeDefs);
+  const isRouteMode = experienceMode === 'routes';
   const availableRouteCount = useMemo(() => {
     return Object.keys(routeCounts).length || routeEntries.length;
   }, [routeCounts, routeEntries.length]);
@@ -256,48 +258,82 @@ export default function ExplorerPanels({
     onSelectFeature(currentRoute.stops[clamped].id);
   };
 
+  const returnToExplore = () => {
+    onActivatePlacesMode?.();
+    setActivePanel(null);
+  };
+
   return (
     <>
-      <div className="map-toolbar">
-        <div className="floating-toolbar-label">Explore</div>
-        <button
-          type="button"
-          className={'map-toolbar-button' + (sidebarOpen ? ' active' : '')}
-          onClick={() => onToggleSidebar?.()}
-        >
-          Filters
-        </button>
-        <button
-          type="button"
-          className={'map-toolbar-button map-toolbar-button-route' + (activePanel === 'routes' ? ' active' : '')}
-          onClick={() => togglePanel('routes')}
-        >
-          Route guide
-          <span>{availableRouteCount}</span>
-        </button>
-        <button
-          type="button"
-          className={'map-toolbar-button' + (activePanel === 'results' ? ' active' : '')}
-          onClick={() => togglePanel('results')}
-        >
-          Places list
-          <span>{visibleFeatures.length}</span>
-        </button>
+      <div className={'map-toolbar' + (isRouteMode ? ' route-mode' : '')}>
+        <div className="floating-toolbar-label">{isRouteMode ? 'Route mode' : 'Explore mode'}</div>
+        {isRouteMode ? (
+          <>
+            <button
+              type="button"
+              className="map-toolbar-button map-toolbar-button-secondary"
+              onClick={returnToExplore}
+            >
+              Back to explore
+            </button>
+            <button
+              type="button"
+              className={'map-toolbar-button map-toolbar-button-route' + (activePanel === 'routes' ? ' active' : '')}
+              onClick={() => togglePanel('routes')}
+            >
+              Route guide
+              <span>{availableRouteCount}</span>
+            </button>
+            {activeRoute !== 'all' ? (
+              <button type="button" className="map-toolbar-button" onClick={() => selectRoute('all')}>
+                All routes
+              </button>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              className={'map-toolbar-button' + (sidebarOpen ? ' active' : '')}
+              onClick={() => onToggleSidebar?.()}
+            >
+              Filters
+            </button>
+            <button
+              type="button"
+              className={'map-toolbar-button map-toolbar-button-route' + (activePanel === 'routes' ? ' active' : '')}
+              onClick={() => togglePanel('routes')}
+            >
+              Route guide
+              <span>{availableRouteCount}</span>
+            </button>
+            <button
+              type="button"
+              className={'map-toolbar-button' + (activePanel === 'results' ? ' active' : '')}
+              onClick={() => togglePanel('results')}
+            >
+              Places list
+              <span>{visibleFeatures.length}</span>
+            </button>
+          </>
+        )}
       </div>
 
-      <div className={'overlay-panel' + (activePanel ? ' is-open' : '') + (activePanel === 'routes' ? ' route-panel-open' : '')}>
+      <div className={'overlay-panel' + (activePanel ? ' is-open' : '') + (activePanel === 'routes' ? ' route-panel-open' : '') + (isRouteMode ? ' route-mode-shell' : '')}>
         {activePanel ? (
           <>
             <div className="overlay-panel-header">
               <div>
-                <div className="overlay-eyebrow">{activePanel === 'results' ? 'Places Drawer' : 'Routes Drawer'}</div>
-                <h2>{activePanel === 'results' ? `${visibleFeatures.length} places match` : 'Curated Routes'}</h2>
+                <div className="overlay-eyebrow">{activePanel === 'results' ? 'Places explorer' : isRouteMode ? 'Route guide mode' : 'Routes drawer'}</div>
+                <h2>{activePanel === 'results' ? `${visibleFeatures.length} places match` : isRouteMode ? 'Route Guide' : 'Curated Routes'}</h2>
                 <p>
                   {activePanel === 'results'
                     ? activeRoute !== 'all' && routeDefs[activeRoute]
                       ? `Now showing the ${routeDefs[activeRoute].label} route.`
                       : 'Filtered hidden-heritage places.'
-                    : 'Choose a route to turn the map into a guided walk with street-level pathing.'}
+                    : isRouteMode
+                      ? 'Choose a persona-led walk and step through each street-level leg.'
+                      : 'Choose a route to turn the map into a guided walk with street-level pathing.'}
                 </p>
               </div>
               <button type="button" className="overlay-close" onClick={() => setActivePanel(null)}>

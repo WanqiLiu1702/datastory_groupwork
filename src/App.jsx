@@ -650,6 +650,7 @@ export default function App() {
             <ExplorerPanels
               activePanel={activePanel}
               setActivePanel={setActivePanel}
+              experienceMode={experienceMode}
               visibleFeatures={visible}
               routeSourceFeatures={scopedFeatures}
               routeDefs={dataset.metadata.routes || {}}

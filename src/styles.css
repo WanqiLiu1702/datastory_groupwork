@@ -1500,6 +1500,11 @@ body {
   backdrop-filter: blur(12px);
 }
 
+.map-toolbar.route-mode {
+  background: rgba(236, 246, 255, 0.92);
+  border-color: rgba(84, 115, 145, 0.18);
+}
+
 .map-toolbar-button {
   display: inline-flex;
   align-items: center;
@@ -1535,6 +1540,12 @@ body {
 
 .map-toolbar-button.active span {
   background: rgba(255, 255, 255, 0.18);
+}
+
+.map-toolbar-button-secondary {
+  background: rgba(255, 255, 255, 0.92);
+  color: #4d667f;
+  border-color: rgba(84, 115, 145, 0.16);
 }
 
 .map-toolbar-button-route {
@@ -1573,6 +1584,10 @@ body {
 
 .overlay-panel.route-panel-open {
   width: min(540px, calc(100% - 36px));
+}
+
+.overlay-panel.route-panel-open.route-mode-shell {
+  width: min(620px, calc(100% - 36px));
 }
 
 .overlay-panel.is-open {
@@ -2172,7 +2187,7 @@ body {
 .context-toolbar {
   position: absolute;
   left: 18px;
-  top: 18px;
+  top: 88px;
   z-index: 680;
   display: flex;
   align-items: center;
@@ -2190,7 +2205,7 @@ body {
 .context-summary {
   position: absolute;
   left: 18px;
-  top: 92px;
+  top: 162px;
   z-index: 675;
   display: flex;
   flex-direction: column;
@@ -2317,6 +2332,11 @@ body {
 .leaflet-popup-content-wrapper {
   border-radius: 12px;
   font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+.leaflet-top.leaflet-left .leaflet-control {
+  margin-top: 18px;
+  margin-left: 18px;
 }
 
 .heritage-hover-label {
@@ -2533,14 +2553,14 @@ body {
   }
 
   .context-toolbar {
-    top: 58px;
+    top: 72px;
     left: 12px;
     right: 12px;
     max-width: none;
   }
 
   .context-summary {
-    top: 132px;
+    top: 146px;
     left: 12px;
     right: 12px;
     width: auto;

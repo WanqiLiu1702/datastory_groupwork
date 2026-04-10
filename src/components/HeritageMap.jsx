@@ -392,7 +392,7 @@ export default function HeritageMap({
       maxZoom: 19
     }).addTo(map);
 
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    L.control.zoom({ position: 'topleft' }).addTo(map);
 
     map.on('click', () => {
       clearAccessRing(map);
