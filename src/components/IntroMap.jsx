@@ -37,12 +37,6 @@ export default function IntroMap({ boundary, features }) {
       attributionControl: false
     }).setView([51.515, -0.12], 11.05);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
-      maxZoom: 19,
-      opacity: 0.62
-    }).addTo(map);
-
     mapRef.current = map;
   }, []);
 
@@ -60,9 +54,9 @@ export default function IntroMap({ boundary, features }) {
         style: {
           color: '#235d58',
           weight: 2,
-          opacity: 0.52,
-          fillColor: '#eff7f3',
-          fillOpacity: 0.1,
+          opacity: 0.62,
+          fillColor: '#eef5f0',
+          fillOpacity: 0.9,
           dashArray: '10 8'
         },
         interactive: false
@@ -80,12 +74,12 @@ export default function IntroMap({ boundary, features }) {
         const [lon, lat] = feature.geometry.coordinates;
         const color = CAT_COLORS[feature.properties.category] || '#6b8d86';
         L.circleMarker([lat, lon], {
-          radius: feature.properties.hidden_quiet ? 4.5 : 3.8,
+          radius: feature.properties.hidden_quiet ? 5.2 : 4.6,
           color,
-          weight: 1.2,
-          opacity: 0.38,
-          fillColor: hexToRgba(color, 0.22),
-          fillOpacity: 0.62
+          weight: 1.5,
+          opacity: 0.82,
+          fillColor: hexToRgba(color, 0.24),
+          fillOpacity: 0.78
         }).addTo(group);
       });
       group.addTo(map);

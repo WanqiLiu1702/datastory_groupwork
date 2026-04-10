@@ -535,9 +535,9 @@ export default function App() {
   }, [filters.route, visible]);
 
   const heroFeatures = useMemo(() => {
-    const quiet = dataset.features.filter(feature => feature.properties.hidden_quiet).slice(0, 42);
-    if (quiet.length) return quiet;
-    return dataset.features.slice(0, 42);
+    const coreHidden = dataset.features.filter(feature => feature.properties.hidden_core);
+    if (coreHidden.length) return coreHidden;
+    return dataset.features.slice(0, 120);
   }, [dataset.features]);
 
   const scrollToExplorer = useCallback(() => {
