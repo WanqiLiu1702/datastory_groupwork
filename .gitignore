@@ -1,0 +1,9 @@
+node_modules
+dist
+.DS_Store
+*.log
+.vite
+data-cache
+eh-*.html
+preview*.log
+serve*.log

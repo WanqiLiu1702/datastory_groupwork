@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Root>
+	<name>Transport for London Stations facilities</name>
+	<open>0</open>
+	<description>Transport for London Stations facilities</description>
+	<Header>
+		<Identifier>TfL | Station information</Identifier>
+		<DisplayTitle>TfL | Station information</DisplayTitle>
+		<Version>1.0</Version>
+		<PublishDateTime canonical="2010-02-04 11:54:08:000">Thu, 04 Feb 2010 11:54:08 +0100</PublishDateTime>
+		<Author>webteam@tfl.gov.uk</Author>
+		<Owner>Transport for London</Owner>
+		<RefreshRate>259200</RefreshRate>
+		<Max_Latency>1440</Max_Latency>
+		<TimeToError>2880</TimeToError>
+		<Schedule>Every quarter</Schedule>
+		<Attribution>
+			<Url>http://www.tfl.gov.uk/</Url>
+			<Text>(c) Transport for London</Text>
+			<Logo>http://www.tfl.gov.uk/tfl-global/images/roundel.gif</Logo>
+		</Attribution>
+		<Language>en</Language>
+	</Header>
+	<Style id="tubeStyle">
+		<IconStyle>
+			<Icon>
+				<href>http://www.tfl.gov.uk/tfl-global/images/syndication/roundel-tube.png</href>
+			</Icon>
+		</IconStyle>
+	</Style>
+	<Style id="dlrStyle">
+		<IconStyle>
+			<Icon>
+				<href>http://www.tfl.gov.uk/tfl-global/images/syndication/roundel-dlr.png</href>
+			</Icon>
+		</IconStyle>
+	</Style>
+	<Style id="overgroundStyle">
+		<IconStyle>
+			<Icon>
+				<href>http://www.tfl.gov.uk/tfl-global/images/syndication/roundel-overground.png</href>
+			</Icon>
+		</IconStyle>
+	</Style>
+	<stations>
+		<station id="1000002" type="tube" xmlns="">
+			<name>Acton Town</name>
+			<contactDetails>
+				<address>Acton Town Station, London Underground Ltd., Gunnersbury Lane, London, W3 8HN</address>
+				<phone>0845 330 9875</phone>
+			</contactDetails>
+			<servingLines>
+				<servingLine>District</servingLine>
+				<servingLine>Piccadilly</servingLine>
+			</servingLines>
+			<zones>
+				<zone>3</zone>
+			</zones>
+			<facilities>
+				<facility name="Ticket Halls">1</facility>
+				<facility name="Lifts">0</facility>
+				<facility name="Escalators">0</facility>
+				<facility name="Gates">4</facility>
+				<facility name="Toilets">yes</facility>
+				<facility name="Photo Booths">2</facility>
+				<facility name="Cash Machines">2</facility>
+				<facility name="Payphones">4</facility>
+				<facility name="Car park">no</facility>
+				<facility name="Vending Machines">4 snack, 0 drink</facility>
+				<facility name="Help Points">0 on platforms, 0 in ticket halls, 0 elsewhere</facility>
+				<facility name="Bridge">yes</facility>
+				<facility name="Waiting Room">yes</facility>
+				<facility name="Other Facilities">subway to street.</facility>
+			</facilities>
+			<entrances xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+				<entrance>
+					<name>Gunnersbury Lane</name>
+					<entranceToBookingHall>Level</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<path>
+							<heading>EASTBOUND</heading>
+							<pathDescription>14, 14 stairs down</pathDescription>
+						</path>
+						<path>
+							<heading>WESTBOUND</heading>
+							<pathDescription>14,14 stairs down</pathDescription>
+						</path>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>District</trainName>
+						<platformToTrainSteps>LEVEL_300</platformToTrainSteps>
+					</platformToTrain>
+					<platformToTrain>
+						<trainName>Piccadilly </trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+			</entrances>
+			<openingHours>
+				<openingHour>
+					<entrance>Main entrance: </entrance>
+					<timeIntervals type="Mon-Fri">
+						<timeInterval>
+							<from>05:30</from>
+							<to>21:30</to>
+						</timeInterval>
+					</timeIntervals>
+					<timeIntervals type="Sat">
+						<timeInterval>
+							<from>06:00</from>
+							<to>21:30</to>
+						</timeInterval>
+					</timeIntervals>
+					<timeIntervals type="Sun">
+						<timeInterval>
+							<from>07:00</from>
+							<to>23:00</to>
+						</timeInterval>
+					</timeIntervals>
+				</openingHour>
+			</openingHours>
+			<Placemark>
+				<name>Acton Town Station</name>
+				<description>Acton Town Station, London Underground Ltd., Gunnersbury Lane, London, W3 8HN</description>
+				<Point>
+					<coordinates>-.280251203536110600,51.502749773000570000,0</coordinates>
+				</Point>
+				<styleUrl>#tubeStyle</styleUrl>
+			</Placemark>
+		</station>
+		<station id="1000003" type="tube" xmlns="">
+			<name>Aldgate</name>
+			<contactDetails>
+				<address>Aldgate Station, London Underground Ltd., Aldgate High St, London, EC3N 1AH</address>
+				<phone>0845 330 9878</phone>
+			</contactDetails>
+			<servingLines>
+				<servingLine>Circle</servingLine>
+				<servingLine>Hammersmith &amp; City</servingLine>
+				<servingLine>Metropolitan</servingLine>
+			</servingLines>
+			<zones>
+				<zone>1</zone>
+			</zones>
+			<facilities>
+				<facility name="Ticket Halls">1</facility>
+				<facility name="Lifts">0</facility>
+				<facility name="Escalators">0</facility>
+				<facility name="Gates">6</facility>
+				<facility name="Toilets">no</facility>
+				<facility name="Photo Booths">0</facility>
+				<facility name="Cash Machines">0</facility>
+				<facility name="Payphones">3</facility>
+				<facility name="Car park">no</facility>
+				<facility name="Vending Machines">4</facility>
+				<facility name="Help Points">0 on platforms, 0 in ticket halls, 0 elsewhere</facility>
+				<facility name="Bridge">no</facility>
+				<facility name="Waiting Room">yes</facility>
+				<facility name="Other Facilities">electronic whiteboards in ticket hall.</facility>
+			</facilities>
+			<entrances xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+				<entrance>
+					<name>Aldgate High Street</name>
+					<entranceToBookingHall>Level</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<pointName />
+						<pathDescription> 16, 10, 14 stairs down</pathDescription>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>Metropolitan</trainName>
+						<platformToTrainSteps>LEVEL_200</platformToTrainSteps>
+					</platformToTrain>
+					<platformToTrain>
+						<trainName>Circle</trainName>
+						<platformToTrainSteps>LEVEL_200</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+			</entrances>
+			<openingHours>
+				<openingHour>
+					<entrance>Northern</entrance>
+					<timeIntervals type="Mon-Fri">
+						<timeInterval>
+							<from>07:00</from>
+							<to>10:00</to>
+						</timeInterval>
+						<timeInterval>
+							<from>15:30</from>
+							<to>19:00</to>
+						</timeInterval>
+					</timeIntervals>
+				</openingHour>
+			</openingHours>
+			<Placemark>
+				<name>
+					Aldgate Station
+				</name>
+				<description>Aldgate Station, London Underground Ltd., Aldgate High St, London, EC3N 1AH</description>
+				<Point>
+					<coordinates>
+						-.075614184477749600,51.514271823083390000,0
+					</coordinates>
+				</Point>
+				<styleUrl>#tubeStyle</styleUrl>
+			</Placemark>
+		</station>
+		<station id="1000004" type="tube" xmlns="">
+			<name>Aldgate East</name>
+			<contactDetails>
+				<address>Aldgate East Station, London Underground Ltd., Whitechapel High St, London, E1 7PT</address>
+				<phone>0845 330 9878</phone>
+			</contactDetails>
+			<servingLines>
+				<servingLine>Circle</servingLine>
+				<servingLine>District</servingLine>
+				<servingLine>Hammersmith &amp; City</servingLine>
+			</servingLines>
+			<zones>
+				<zone>1</zone>
+			</zones>
+			<facilities>
+				<facility name="Ticket Halls">2</facility>
+				<facility name="Lifts">0</facility>
+				<facility name="Escalators">0</facility>
+				<facility name="Gates">9</facility>
+				<facility name="Toilets">no</facility>
+				<facility name="Photo Booths">1</facility>
+				<facility name="Cash Machines">2</facility>
+				<facility name="Payphones">8</facility>
+				<facility name="Car park">no</facility>
+				<facility name="Vending Machines">7</facility>
+				<facility name="Help Points">0 on platforms, 0 in ticket halls, 0 elsewhere</facility>
+				<facility name="Bridge">yes</facility>
+				<facility name="Waiting Room">yes</facility>
+				<facility name="Other Facilities">
+				</facility>
+			</facilities>
+			<entrances xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+				<entrance>
+					<name>Whitechapel High Street (North Side) and Commercial Street (West Side)</name>
+					<entranceToBookingHall> 13, 13 stairs down</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<pointName />
+						<pathDescription>9, 13 stairs down</pathDescription>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>District </trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+					<platformToTrain>
+						<trainName> Hammersmith &amp; City</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+				<entrance>
+					<name>Leman Street (West) (Colchester Street)</name>
+					<entranceToBookingHall>16, 6, 4 stairs down</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<pointName />
+						<pathDescription> 9, 13 stairs down</pathDescription>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>District </trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+					<platformToTrain>
+						<trainName> Hammersmith &amp; City</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+				<entrance>
+					<name>Whitechapel High Street (South Side) and Leman Street (East Side)</name>
+					<entranceToBookingHall> 12, 12 stairs down, subway, 4 stairs down</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<pointName />
+						<pathDescription>9, 1 stairs down</pathDescription>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>District </trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+					<platformToTrain>
+						<trainName> Hammersmith &amp; City</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+				<entrance>
+					<name>Leman Street (East) (Colchester Street)</name>
+					<entranceToBookingHall>Ramp down, subway, 4 stairs down</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<pointName />
+						<pathDescription> 9, 13 stairs down</pathDescription>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>District </trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+					<platformToTrain>
+						<trainName> Hammersmith &amp; City</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+				<entrance>
+					<name>Braham Street (South Side)</name>
+					<entranceToBookingHall> 15 stairs down, subway, 4 stairs down</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<pointName />
+						<pathDescription> 9, 13 stairs down</pathDescription>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>District</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+					<platformToTrain>
+						<trainName> Hammersmith &amp; City</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+				<entrance>
+					<name>Braham Street (North Side) and Drum Street</name>
+					<entranceToBookingHall> Ramp down, subway, 4 stairs down</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<pointName />
+						<pathDescription> 9, 13 stairs down</pathDescription>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>District</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+					<platformToTrain>
+						<trainName> Hammersmith &amp; City</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+				<entrance>
+					<name>Whitechapel High Street (South Side) and Braham Street (North Side)</name>
+					<entranceToBookingHall> Ramp down, or 13, 12 stairs down, then subway, 6 stairs down</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<pointName />
+						<pathDescription>11, 11 stairs down</pathDescription>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>District </trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+					<platformToTrain>
+						<trainName> Hammersmith &amp; City</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+				<entrance>
+					<name>Commercial Road (North Side) and Manningtree Street</name>
+					<entranceToBookingHall> Ramp down, or 12, 13 stairs down, then subway, 6 stairs down</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<pointName />
+						<pathDescription> 11, 11 stairs down</pathDescription>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>District</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+					<platformToTrain>
+						<trainName> Hammersmith &amp; City</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+				<entrance>
+					<name>Whitechapel High Street (South Side)</name>
+					<entranceToBookingHall> Ramp down or 11, 11 stairs down then 6 stairs down</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<pointName />
+						<pathDescription>11, 11 stairs down</pathDescription>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>District </trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+					<platformToTrain>
+						<trainName> Hammersmith &amp; City</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+				<entrance>
+					<name>Whitechapel High Street (North Side)</name>
+					<entranceToBookingHall> 15, 5, 5 stairs down</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<pointName />
+						<pathDescription> 11, 11 stairs down</pathDescription>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>District</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+					<platformToTrain>
+						<trainName> Hammersmith &amp; City</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+			</entrances>
+			<openingHours>
+				<openingHour>
+					<entrance>Gallery (East)</entrance>
+					<timeIntervals type="Mon-Fri">
+						<timeInterval>
+							<from>08:00</from>
+							<to>19:00</to>
+						</timeInterval>
+					</timeIntervals>
+					<timeIntervals type="Sat">
+						<timeInterval>
+							<from>09:00</from>
+							<to>13:30</to>
+						</timeInterval>
+					</timeIntervals>
+				</openingHour>
+				<openingHour>
+					<entrance>Main (West)</entrance>
+					<timeIntervals type="Mon-Fri">
+						<timeInterval>
+							<from>06:30</from>
+							<to>19:30</to>
+						</timeInterval>
+					</timeIntervals>
+					<timeIntervals type="Sat">
+						<timeInterval>
+							<from>08:30</from>
+							<to>20:30</to>
+						</timeInterval>
+					</timeIntervals>
+					<timeIntervals type="Sun">
+						<timeInterval>
+							<from>08:30</from>
+							<to>20:00</to>
+						</timeInterval>
+					</timeIntervals>
+				</openingHour>
+			</openingHours>
+			<Placemark>
+				<name>
+					Aldgate East Station
+				</name>
+				<description>Aldgate East Station, London Underground Ltd., Whitechapel High St, London, E1 7PT</description>
+				<Point>
+					<coordinates>
+						-.072287119975365420,51.515233413796480000,0
+					</coordinates>
+				</Point>
+				<styleUrl>#tubeStyle</styleUrl>
+			</Placemark>
+		</station>
+		<station id="1000005" type="tube" xmlns="">
+			<name>Alperton</name>
+			<contactDetails>
+				<address>Alperton Station, London Underground Ltd., Ealing Rd, Wembley, Middlesex, HA0 4LL</address>
+				<phone>0845 330 9875</phone>
+			</contactDetails>
+			<servingLines>
+				<servingLine>Piccadilly</servingLine>
+			</servingLines>
+			<zones>
+				<zone>4</zone>
+			</zones>
+			<facilities>
+				<facility name="Ticket Halls">1</facility>
+				<facility name="Lifts">0</facility>
+				<facility name="Escalators">0</facility>
+				<facility name="Gates">3</facility>
+				<facility name="Toilets">yes</facility>
+				<facility name="Photo Booths">1</facility>
+				<facility name="Cash Machines">0</facility>
+				<facility name="Payphones">2</facility>
+				<facility name="Car park">no</facility>
+				<facility name="Vending Machines">2 snack, 1 drink</facility>
+				<facility name="Help Points">0 on platforms, 0 in ticket halls, 0 elsewhere</facility>
+				<facility name="Bridge">yes</facility>
+				<facility name="Waiting Room">yes</facility>
+				<facility name="Other Facilities">
+				</facility>
+			</facilities>
+			<entrances xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+				<entrance>
+					<name>Ealing Road</name>
+					<entranceToBookingHall> Level</entranceToBookingHall>
+					<bookingHallToPlatform>
+						<pointName />
+						<pathDescription> 3 x 14 stairs up</pathDescription>
+					</bookingHallToPlatform>
+					<platformToTrain>
+						<trainName>Piccadilly</trainName>
+						<platformToTrainSteps>LEVEL_100</platformToTrainSteps>
+					</platformToTrain>
+				</entrance>
+			</entrances>
+			<openingHours>
+				<openingHour>
+					<entrance>Main entrance: </entrance>
+					<timeIntervals type="Mon-Fri">
+						<timeInterval>
+							<from>06:30</from>
+							<to>14:00</to>
+						</timeInterval>
+						<timeInterval>
+							<from>15:30</from>
+							<to>20:00</to>
+						</timeInterval>
+					</timeIntervals>
+					<timeIntervals type="Sat">
+						<timeInterval>
+							<from>07:30</from>
+							<to>18:30</to>
+						</timeInterval>
+					</timeIntervals>
+					<timeIntervals type="Sun">
+						<timeInterval>
+							<from>09:00</from>
+							<to>21:00</to>
+						</timeInterval>
+					</timeIntervals>
+				</openingHour>
+			</openingHours>
+			<Placemark>
+				<name>
+					Alperton Station
+				</name>
+				<description>Alperton Station, London Underground Ltd., Ealing Rd, Wembley, Middlesex, HA0 4LL</description>
+				<Point>
+					<coordinates>
+						-.299486538678611470,51.540694766293470000,0
+					</coordinates>
+				</Point>
+				<styleUrl>#tubeStyle</styleUrl>
+			</Placemark>
+		</station>
+	</stations>
+</Root>
