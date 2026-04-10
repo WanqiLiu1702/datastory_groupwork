@@ -5,6 +5,8 @@ import ExplorerPanels from './components/ExplorerPanels.jsx';
 import ContextSummary from './components/ContextSummary.jsx';
 import HeroLanding from './components/HeroLanding.jsx';
 import CategoryMixPanel from './components/CategoryMixPanel.jsx';
+import StoryContributionSection from './components/StoryContributionSection.jsx';
+import AboutSection from './components/AboutSection.jsx';
 import { CAT_LABELS, ROUTE_PERSONAS } from './constants.js';
 
 function matchesHiddenFilter(feature, hidden) {
@@ -261,6 +263,7 @@ export default function App() {
   const [routeStopLimit, setRouteStopLimit] = useState(4);
   const [routeLegIndex, setRouteLegIndex] = useState(0);
   const [routeAudience, setRouteAudience] = useState(ROUTE_PERSONAS[0].id);
+  const [experienceMode, setExperienceMode] = useState('places');
   const [routeDirections, setRouteDirections] = useState({
     status: 'idle',
     data: null,
@@ -268,6 +271,8 @@ export default function App() {
   });
   const mapApiRef = useRef(null);
   const explorerRef = useRef(null);
+  const storiesRef = useRef(null);
+  const aboutRef = useRef(null);
 
   const handleFeatureSelect = useCallback(id => {
     setSelectedFeatureId(id);
@@ -538,7 +543,16 @@ export default function App() {
     explorerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
+  const scrollToStories = useCallback(() => {
+    storiesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
+  const scrollToAbout = useCallback(() => {
+    aboutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
   const openPlacesExplorer = useCallback(() => {
+    setExperienceMode('places');
     setSelectedFeatureId(null);
     setContextLayers(emptyContextLayers());
     setActivePanel('results');
@@ -546,6 +560,7 @@ export default function App() {
   }, [scrollToExplorer]);
 
   const openRouteGuide = useCallback((personaId = null) => {
+    setExperienceMode('routes');
     if (personaId) {
       setRouteAudience(personaId);
     }
@@ -568,10 +583,12 @@ export default function App() {
         onExploreMap={scrollToExplorer}
         onOpenPlaces={openPlacesExplorer}
         onOpenRoutes={openRouteGuide}
+        onOpenStories={scrollToStories}
+        onOpenAbout={scrollToAbout}
       />
 
       <section ref={explorerRef} className="explorer-section">
-        <div className="app">
+        <div className={'app' + (experienceMode === 'routes' ? ' app-route-focus' : '')}>
           <CategoryMixPanel items={categoryComposition} total={visible.length} />
           <Sidebar
             counts={counts}
@@ -580,6 +597,7 @@ export default function App() {
             boroughOptions={boroughOptions}
             boroughRanking={boroughRanking}
             categoryRanking={categoryRanking}
+            experienceMode={experienceMode}
             onOpenPlaces={openPlacesExplorer}
             onOpenRoutes={openRouteGuide}
           />
@@ -617,6 +635,8 @@ export default function App() {
               routeAudience={routeAudience}
               setRouteAudience={setRouteAudience}
               routeDirections={routeDirections}
+              onActivatePlacesMode={() => setExperienceMode('places')}
+              onActivateRouteMode={() => setExperienceMode('routes')}
               onSetRoute={value => {
                 setSelectedFeatureId(null);
                 setContextLayers(emptyContextLayers());
@@ -678,6 +698,18 @@ export default function App() {
             ) : null}
           </div>
         </div>
+      </section>
+
+      <section ref={storiesRef}>
+        <StoryContributionSection
+          boundary={boundary}
+          onOpenPlaces={openPlacesExplorer}
+          onOpenRoutes={openRouteGuide}
+        />
+      </section>
+
+      <section ref={aboutRef}>
+        <AboutSection counts={counts} routeCount={Object.keys(dataset.metadata.routes || {}).length} />
       </section>
     </div>
   );

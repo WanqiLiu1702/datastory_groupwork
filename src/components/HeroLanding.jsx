@@ -12,7 +12,9 @@ export default function HeroLanding({
   onChoosePersona,
   onExploreMap,
   onOpenPlaces,
-  onOpenRoutes
+  onOpenRoutes,
+  onOpenStories,
+  onOpenAbout
 }) {
   return (
     <section className="hero-section">
@@ -28,34 +30,15 @@ export default function HeroLanding({
             cultural sites that matter but are often missing from mainstream visitor flows.
           </p>
 
-          <div className="hero-actions">
-            <button type="button" className="hero-button hero-button-primary" onClick={onOpenPlaces}>
-              Open places explorer
-            </button>
-            <button type="button" className="hero-button hero-button-secondary" onClick={() => onOpenRoutes()}>
-              Open route guide
-            </button>
-          </div>
-
-          <div className="hero-method-card">
-            <div className="hero-method-head">
-              <div className="hero-route-kicker">Method</div>
-              <span>Official plaques + TfL + OSM context</span>
-            </div>
-            <div className="hero-method-steps">
-              <div className="hero-method-step">
-                <strong>1</strong>
-                <span>Start from 1,028 official English Heritage blue plaques across Greater London.</span>
-              </div>
-              <div className="hero-method-step">
-                <strong>2</strong>
-                <span>Define hidden places through low tourism visibility, walkable TfL access and quieter environmental cues.</span>
-              </div>
-              <div className="hero-method-step">
-                <strong>3</strong>
-                <span>Turn filtered sites into persona-led route suggestions and place-based map exploration.</span>
-              </div>
-            </div>
+          <div className="hero-method-inline">
+            <div className="hero-route-kicker">Method snapshot</div>
+            <p>
+              English Heritage plaques + TfL access + OSM tourism, green and road context. Full data notes sit under
+              <button type="button" className="hero-inline-link" onClick={onOpenAbout}>
+                About us
+              </button>
+              .
+            </p>
           </div>
 
           <div className="hero-stats">
@@ -76,53 +59,70 @@ export default function HeroLanding({
               <span>guided routes</span>
             </div>
           </div>
+
+          <button type="button" className="hero-button hero-button-primary hero-button-wide" onClick={onExploreMap}>
+            Scroll into map explorer
+          </button>
         </div>
 
-        <div className="hero-route-spotlight">
-          <div className="hero-route-kicker">Choose an entry mode</div>
-          <h2>Browse points or open a guided walk</h2>
-          <p>
-            Use the map as a place browser, or jump straight into a route guide tuned to a different visitor persona.
-          </p>
+        <div className="hero-menu">
+          <button type="button" className="hero-menu-card" onClick={onOpenPlaces}>
+            <span className="hero-menu-kicker">01</span>
+            <strong>Explore Hidden Gems</strong>
+            <p>Search, filter and compare hidden heritage through theme, context, borough and quietness.</p>
+            <span className="hero-menu-meta">Places-first mode</span>
+          </button>
 
-          <div className="hero-entry-row">
-            <button type="button" className="hero-entry-card" onClick={onOpenPlaces}>
-              <span className="hero-entry-kicker">Places</span>
-              <strong>Free exploration</strong>
-              <span>Filter plaques by theme, borough and quietness.</span>
-            </button>
-            <button type="button" className="hero-entry-card hero-entry-card-route" onClick={() => onOpenRoutes()}>
-              <span className="hero-entry-kicker">Routes</span>
-              <strong>Persona-led guide</strong>
-              <span>Open walkable routes with step-by-step street paths.</span>
+          <div className="hero-menu-card hero-menu-card-route">
+            <span className="hero-menu-kicker">02</span>
+            <strong>Plan Your Route</strong>
+            <p>Open route mode and move through persona-led walks with real street-level path previews.</p>
+            <div className="hero-persona-mini-grid">
+              {ROUTE_PERSONAS.map(persona => (
+                <button
+                  key={persona.id}
+                  type="button"
+                  className={'hero-persona-mini' + (routeAudience === persona.id ? ' active' : '')}
+                  style={{ '--hero-persona-accent': persona.accent }}
+                  onClick={() => {
+                    onChoosePersona(persona.id);
+                    onOpenRoutes(persona.id);
+                  }}
+                >
+                  <span>{persona.shortLabel}</span>
+                  <strong>{routePersonaCounts[persona.id] || 0}</strong>
+                </button>
+              ))}
+            </div>
+            <button type="button" className="hero-menu-link" onClick={() => onOpenRoutes()}>
+              Open all {Object.keys(routeDefs).length} guided routes
             </button>
           </div>
 
-          <div className="hero-route-grid">
-            {ROUTE_PERSONAS.map(persona => (
-              <button
-                key={persona.id}
-                type="button"
-                className={'hero-route-card' + (routeAudience === persona.id ? ' active' : '')}
-                onClick={() => {
-                  onChoosePersona(persona.id);
-                  onOpenRoutes(persona.id);
-                }}
-                style={{ '--hero-persona-accent': persona.accent }}
-              >
-                <span className="hero-route-badge">{persona.shortLabel}</span>
-                <strong>{persona.title}</strong>
-                <span className="hero-route-description">{persona.description}</span>
-                <span>{routePersonaCounts[persona.id] || 0} matching routes</span>
-              </button>
-            ))}
-          </div>
+          <button type="button" className="hero-menu-card" onClick={onOpenStories}>
+            <span className="hero-menu-kicker">03</span>
+            <strong>Uncover Stories</strong>
+            <p>Suggest overlooked heritage sites that are missing from the current map and place them on London yourself.</p>
+            <span className="hero-menu-meta">Contribution prototype</span>
+          </button>
+
+          <button type="button" className="hero-menu-card" onClick={onOpenAbout}>
+            <span className="hero-menu-kicker">04</span>
+            <strong>About us</strong>
+            <p>See the data sources, filtering method and the social implications behind recommending hidden places.</p>
+            <span className="hero-menu-meta">Data + method + reflection</span>
+          </button>
         </div>
       </div>
 
-      <button type="button" className="hero-scroll-cue" onClick={onExploreMap}>
-        Scroll into map
-      </button>
+      <div className="hero-scroll-row">
+        <button type="button" className="hero-scroll-cue" onClick={onExploreMap}>
+          Scroll into map
+        </button>
+        <button type="button" className="hero-scroll-cue hero-scroll-cue-muted" onClick={onOpenAbout}>
+          Jump to data and method
+        </button>
+      </div>
     </section>
   );
 }

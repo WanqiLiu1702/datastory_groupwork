@@ -140,6 +140,8 @@ export default function ExplorerPanels({
   routeAudience,
   setRouteAudience,
   routeDirections,
+  onActivatePlacesMode,
+  onActivateRouteMode,
   onSetRoute,
   onSelectFeature
 }) {
@@ -196,10 +198,13 @@ export default function ExplorerPanels({
   }, [activeRoute, routeDefs]);
 
   const togglePanel = panel => {
+    if (panel === 'routes') onActivateRouteMode?.();
+    if (panel === 'results') onActivatePlacesMode?.();
     setActivePanel(current => (current === panel ? null : panel));
   };
 
   const selectRoute = routeKey => {
+    onActivateRouteMode?.();
     onSetRoute(routeKey);
     setActivePanel('routes');
     setRouteLegIndex(0);
