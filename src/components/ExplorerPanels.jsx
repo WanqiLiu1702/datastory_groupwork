@@ -208,12 +208,12 @@ export default function ExplorerPanels({
           className={'map-toolbar-button' + (activePanel === 'routes' ? ' active' : '')}
           onClick={() => togglePanel('routes')}
         >
-          Curated routes
+          Route guide
           <span>{availableRouteCount}</span>
         </button>
       </div>
 
-      <div className={'overlay-panel' + (activePanel ? ' is-open' : '')}>
+      <div className={'overlay-panel' + (activePanel ? ' is-open' : '') + (activePanel === 'routes' ? ' route-panel-open' : '')}>
         {activePanel ? (
           <>
             <div className="overlay-panel-header">

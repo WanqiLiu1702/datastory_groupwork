@@ -492,11 +492,11 @@ export default function HeritageMap({
           const marker = L.marker([station.lat, station.lon], {
             icon: L.divIcon({
               className: '',
-              html: '<span class="route-station-marker"></span>',
-              iconSize: [16, 16],
-              iconAnchor: [8, 8]
+              html: '<span class="route-station-marker"><span>TfL</span></span>',
+              iconSize: [34, 22],
+              iconAnchor: [17, 11]
             }),
-            zIndexOffset: 240
+            zIndexOffset: 340
           }).bindTooltip(
             `${station.name} · ${station.count} nearby stops${station.lines.length ? ` · ${station.lines.join(', ')}` : ''}`,
             {

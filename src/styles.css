@@ -628,6 +628,10 @@ body {
   overflow: hidden;
 }
 
+.overlay-panel.route-panel-open {
+  width: min(540px, calc(100% - 36px));
+}
+
 .overlay-panel.is-open {
   transform: translateX(0);
   opacity: 1;
@@ -1031,12 +1035,23 @@ body {
 
 .route-station-marker {
   display: inline-flex;
-  width: 14px;
-  height: 14px;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 20px;
+  padding: 0 6px;
   border: 2px solid #4f7ea5;
-  border-radius: 4px;
-  background: rgba(233, 244, 255, 0.92);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.88), 0 4px 10px rgba(31, 42, 38, 0.12);
+  border-radius: 999px;
+  background: rgba(233, 244, 255, 0.96);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.88), 0 6px 14px rgba(31, 42, 38, 0.14);
+}
+
+.route-station-marker span {
+  color: #4f7ea5;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
 .route-swatch-neutral {
