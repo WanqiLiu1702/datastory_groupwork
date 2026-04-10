@@ -627,22 +627,30 @@ body {
   position: relative;
   flex: 1;
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
+  grid-template-columns: 34px minmax(0, 1fr);
   gap: 12px;
   margin-top: 18px;
   min-height: 0;
 }
 
-.mix-rail-scale {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 4px 0;
-  color: var(--muted);
+.mix-rail-share-labels {
+  position: relative;
+  min-height: 0;
+}
+
+.mix-rail-share-label {
+  position: absolute;
+  right: 0;
+  color: #3b5753;
   font-family: 'Helvetica Neue', Arial, sans-serif;
   font-size: 10px;
   font-weight: 700;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+
+.mix-rail-share-label.compact {
+  font-size: 9px;
 }
 
 .mix-rail-chart {
@@ -693,7 +701,7 @@ body {
   left: 58px;
   width: 96px;
   font-family: 'Helvetica Neue', Arial, sans-serif;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.2px;
   white-space: normal;
@@ -704,7 +712,7 @@ body {
 }
 
 .mix-rail-label.compact {
-  font-size: 8px;
+  font-size: 7px;
 }
 
 .story-shell {

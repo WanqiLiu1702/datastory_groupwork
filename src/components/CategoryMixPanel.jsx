@@ -30,10 +30,17 @@ export default function CategoryMixPanel({ items, total }) {
       </div>
 
       <div className="mix-rail-body">
-        <div className="mix-rail-scale">
-          <span>0%</span>
-          <span>50%</span>
-          <span>100%</span>
+        <div className="mix-rail-share-labels">
+          {segments.map(item => (
+            <div
+              key={item.key}
+              className={'mix-rail-share-label' + (item.share < 0.12 ? ' compact' : '')}
+              style={{ top: `${item.midpoint * 100}%` }}
+              title={`${CAT_LABELS[item.key] || item.key}: ${Math.round(item.share * 100)}%`}
+            >
+              {Math.round(item.share * 100)}%
+            </div>
+          ))}
         </div>
 
         <div className="mix-rail-chart">
