@@ -28,12 +28,12 @@ export const HIDDEN_DESCRIPTIONS = {
 };
 
 export const CAT_COLORS = {
-  literature: '#6b4a8a',
-  science: '#2c6e9b',
-  arts_music: '#c25450',
-  politics_reform: '#9b6b2c',
-  architecture: '#4a7a5c',
-  exploration: '#2c8a8a'
+  literature: '#8f5d52',
+  science: '#5b7694',
+  arts_music: '#c87457',
+  politics_reform: '#8c7a49',
+  architecture: '#5f826f',
+  exploration: '#5a8690'
 };
 
 export const CONTEXT_LABELS = {
@@ -45,9 +45,9 @@ export const CONTEXT_LABELS = {
 };
 
 export const CONTEXT_COLORS = {
-  street_building: '#7a6f61',
-  park_edge: '#5d8752',
-  waterside: '#2f8b8b',
-  civic_frontage: '#8c5a3c',
-  residential_retreat: '#6f5f8b'
+  street_building: '#8c776a',
+  park_edge: '#7d9a6e',
+  waterside: '#6a95a0',
+  civic_frontage: '#ad785b',
+  residential_retreat: '#9183a6'
 };

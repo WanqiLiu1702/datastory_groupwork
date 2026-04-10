@@ -35,56 +35,56 @@ const ROUTE_DEFS = {
   bloomsbury_backstreets: {
     label: 'Bloomsbury Backstreets',
     description: 'Writers, artists and thinkers in Camden and Westminster away from the main tourist trail.',
-    color: '#6c7a52',
+    color: '#77805a',
     duration: '60-75 min walk',
     focus: 'Literary and scientific central London'
   },
   west_london_creatives: {
     label: 'West London Creatives',
     description: 'Overlooked arts and design plaques across Chelsea, Kensington and riverside streets.',
-    color: '#9b5a43',
+    color: '#b06f57',
     duration: '70-90 min walk',
     focus: 'Arts, music and architecture'
   },
   civic_voices: {
     label: 'Civic Voices',
     description: 'Politicians, campaigners and scientists whose plaques sit in accessible but overlooked neighbourhoods.',
-    color: '#476c8a',
+    color: '#5b7a93',
     duration: '45-60 min walk',
     focus: 'Politics, reform and public life'
   },
   garden_suburb_retreats: {
     label: 'Garden Suburb Retreats',
     description: 'Quieter residential plaques near parks and side streets across outer London.',
-    color: '#7a5d8f',
+    color: '#8979a0',
     duration: '75-105 min walk',
     focus: 'Residential calm and green edges'
   },
   literary_lives_walk: {
     label: 'Literary Lives Walk',
     description: 'Novelists, poets and editors clustered into a tighter route for visitors who want a theme-led walk.',
-    color: '#82539b',
+    color: '#9a685d',
     duration: '50-70 min walk',
     focus: 'Literature'
   },
   riverside_quiet_edge: {
     label: 'Riverside Quiet Edge',
     description: 'Plaques close to river or canal settings where cultural memory meets calmer waterfront detours.',
-    color: '#2f8b8b',
+    color: '#5f9099',
     duration: '55-75 min walk',
     focus: 'Water-adjacent hidden heritage'
   },
   parkside_pause: {
     label: 'Parkside Pause',
     description: 'Shorter quiet-hidden route favouring plaques near parks, commons and greener side streets.',
-    color: '#5d8752',
+    color: '#7b9a68',
     duration: '35-50 min walk',
     focus: 'Green and quiet places'
   },
   step_free_starter: {
     label: 'Step-Free Starter',
     description: 'A more accessible starter route using plaques near lift-served TfL stations and shorter walks.',
-    color: '#55657a',
+    color: '#5e6b81',
     duration: '30-45 min walk',
     focus: 'Shorter approach and easier station access'
   }

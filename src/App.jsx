@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import HeritageMap from './components/HeritageMap.jsx';
+import ExplorerPanels from './components/ExplorerPanels.jsx';
 
 function matchesHiddenFilter(feature, hidden) {
   const props = feature.properties;
@@ -25,6 +26,8 @@ export default function App() {
     minEnv: 1,
     search: ''
   });
+  const [activePanel, setActivePanel] = useState(null);
+  const [selectedFeatureId, setSelectedFeatureId] = useState(null);
   const mapApiRef = useRef(null);
 
   useEffect(() => {
@@ -107,27 +110,60 @@ export default function App() {
     });
   }, [scopedFeatures, filters.route]);
 
+  const selectedFeature = useMemo(() => {
+    return dataset.features.find(feature => feature.properties.id === selectedFeatureId) || null;
+  }, [dataset.features, selectedFeatureId]);
+
+  useEffect(() => {
+    if (!selectedFeatureId) return;
+    const stillVisible = visible.some(feature => feature.properties.id === selectedFeatureId);
+    if (!stillVisible) {
+      setSelectedFeatureId(null);
+    }
+  }, [selectedFeatureId, visible]);
+
   return (
     <div className="app">
       <Sidebar
         counts={counts}
         filters={filters}
         setFilters={setFilters}
-        visibleFeatures={visible}
         boroughOptions={boroughOptions}
-        routeDefs={dataset.metadata.routes || {}}
-        routeCounts={routeCounts}
-        onSelectFeature={id => mapApiRef.current && mapApiRef.current.focusFeature(id)}
+        visibleCount={visible.length}
+        routeTotal={Object.keys(dataset.metadata.routes || {}).length}
       />
-      <HeritageMap
-        features={visible}
-        route={filters.route}
-        routeDefs={dataset.metadata.routes || {}}
-        boundary={boundary}
-        onMapReady={api => {
-          mapApiRef.current = api;
-        }}
-      />
+      <div className="map-shell">
+        <HeritageMap
+          features={visible}
+          route={filters.route}
+          routeDefs={dataset.metadata.routes || {}}
+          boundary={boundary}
+          onFeatureSelect={id => setSelectedFeatureId(id)}
+          onClearSelection={() => setSelectedFeatureId(null)}
+          onMapReady={api => {
+            mapApiRef.current = api;
+          }}
+        />
+        <ExplorerPanels
+          activePanel={activePanel}
+          setActivePanel={setActivePanel}
+          visibleFeatures={visible}
+          routeDefs={dataset.metadata.routes || {}}
+          routeCounts={routeCounts}
+          activeRoute={filters.route}
+          onSetRoute={value => setFilters(current => ({ ...current, route: value }))}
+          onSelectFeature={id => {
+            setSelectedFeatureId(id);
+            mapApiRef.current && mapApiRef.current.focusFeature(id);
+          }}
+        />
+        {selectedFeature ? (
+          <div className="range-legend">
+            <strong>{selectedFeature.properties.name}</strong>
+            <span>Solid ring shows an approximate 5-minute walking catchment, about 400m.</span>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -7,24 +7,20 @@ import {
   HIDDEN_DESCRIPTIONS,
   HIDDEN_LABELS
 } from '../constants.js';
-import ResultList from './ResultList.jsx';
 
 export default function Sidebar({
   counts,
   filters,
   setFilters,
-  visibleFeatures,
   boroughOptions,
-  routeDefs,
-  routeCounts,
-  onSelectFeature
+  visibleCount,
+  routeTotal
 }) {
   const setHidden = value => setFilters(current => ({ ...current, hidden: value, route: 'all' }));
   const setType = value => setFilters(current => ({ ...current, category: value }));
   const setContext = value => setFilters(current => ({ ...current, context: value }));
   const setBorough = value => setFilters(current => ({ ...current, borough: value }));
   const setMinEnv = value => setFilters(current => ({ ...current, minEnv: value }));
-  const setRoute = value => setFilters(current => ({ ...current, route: value }));
   const setSearch = value => setFilters(current => ({ ...current, search: value }));
 
   const Chip = ({ value, label, current, onClick, swatch }) => (
@@ -70,6 +66,24 @@ export default function Sidebar({
           <span className="stat-label">Quiet hidden</span>
           <strong>{counts.quiet}</strong>
         </div>
+      </div>
+
+      <div className="panel panel-explorer">
+        <h2>Explore Panels</h2>
+        <div className="explorer-stats">
+          <div className="explorer-pill">
+            <strong>{visibleCount}</strong>
+            <span>visible places</span>
+          </div>
+          <div className="explorer-pill">
+            <strong>{routeTotal}</strong>
+            <span>curated routes</span>
+          </div>
+        </div>
+        <p className="panel-note">
+          Use the floating <strong>Places</strong> and <strong>Routes</strong> buttons on the map to switch between the
+          result drawer and the route drawer instead of scrolling through a long sidebar list.
+        </p>
       </div>
 
       <div className="panel">
@@ -160,37 +174,6 @@ export default function Sidebar({
         </div>
       </div>
 
-      <div className="panel">
-        <h2>Curated routes</h2>
-        <div className="route-list">
-          <div
-            className={'route' + (filters.route === 'all' ? ' active' : '')}
-            onClick={() => setRoute('all')}
-          >
-            <div className="route-name">Show all current results</div>
-            <div className="route-desc">No curated route filter</div>
-          </div>
-          {Object.entries(routeDefs).map(([key, route]) => (
-            <div
-              key={key}
-              className={'route' + (filters.route === key ? ' active' : '')}
-              onClick={() => setRoute(key)}
-            >
-              <div className="route-head">
-                <div className="route-swatch" style={{ background: route.color }} />
-                <div className="route-name">{route.label}</div>
-                <div className="route-count">{routeCounts[key] || 0}</div>
-              </div>
-              <div className="route-desc">{route.description}</div>
-              <div className="route-meta">
-                <span>{route.duration}</span>
-                <span>{route.focus}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       <div className="panel panel-sources">
         <h2>Access & Travel</h2>
         <p className="panel-note">
@@ -207,8 +190,6 @@ export default function Sidebar({
           encourage slower, more respectful visits.
         </p>
       </div>
-
-      <ResultList features={visibleFeatures} onSelect={onSelectFeature} />
     </aside>
   );
 }

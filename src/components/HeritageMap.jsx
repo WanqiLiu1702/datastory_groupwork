@@ -1,16 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import {
+  CAT_COLORS,
   CAT_LABELS,
   CONTEXT_LABELS,
   OPENING_LABELS
 } from '../constants.js';
 
 function buildIcon(category, properties) {
+  const color = CAT_COLORS[category] || '#5f826f';
   return L.divIcon({
     className: '',
     html: `
-      <div class="marker-pin cat-${category} ${properties.hidden_quiet ? 'quiet' : ''}">
+      <div class="marker-pin ${properties.hidden_quiet ? 'quiet' : ''}" style="background:${color}">
         <span>${properties.hidden_quiet ? '●' : '♦'}</span>
       </div>
     `,
@@ -101,13 +103,41 @@ function orderedLatLngs(features) {
   return ordered.map(feature => [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]);
 }
 
-export default function HeritageMap({ features, route, routeDefs, boundary, onMapReady }) {
+export default function HeritageMap({
+  features,
+  route,
+  routeDefs,
+  boundary,
+  onMapReady,
+  onFeatureSelect,
+  onClearSelection
+}) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const layerRef = useRef(null);
   const lineRef = useRef(null);
   const boundaryRef = useRef(null);
+  const accessRingRef = useRef(null);
   const markerByIdRef = useRef({});
+
+  function clearAccessRing(map) {
+    if (accessRingRef.current) {
+      map.removeLayer(accessRingRef.current);
+      accessRingRef.current = null;
+    }
+  }
+
+  function showAccessRing(map, latlng) {
+    clearAccessRing(map);
+    accessRingRef.current = L.circle(latlng, {
+      radius: 400,
+      color: '#325d58',
+      weight: 2,
+      opacity: 0.9,
+      fillColor: '#7fa39c',
+      fillOpacity: 0.12
+    }).addTo(map);
+  }
 
   useEffect(() => {
     if (mapRef.current) return;
@@ -123,6 +153,13 @@ export default function HeritageMap({ features, route, routeDefs, boundary, onMa
       maxZoom: 19
     }).addTo(map);
 
+    map.on('click', () => {
+      clearAccessRing(map);
+      if (onClearSelection) {
+        onClearSelection();
+      }
+    });
+
     mapRef.current = map;
 
     if (onMapReady) {
@@ -131,12 +168,13 @@ export default function HeritageMap({ features, route, routeDefs, boundary, onMa
           const marker = markerByIdRef.current[id];
           if (marker) {
             map.setView(marker.getLatLng(), 15, { animate: true });
+            showAccessRing(map, marker.getLatLng());
             marker.openPopup();
           }
         }
       });
     }
-  }, [onMapReady]);
+  }, [onClearSelection, onMapReady]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -168,6 +206,7 @@ export default function HeritageMap({ features, route, routeDefs, boundary, onMa
       map.removeLayer(lineRef.current);
       lineRef.current = null;
     }
+    clearAccessRing(map);
 
     markerByIdRef.current = {};
 
@@ -184,6 +223,14 @@ export default function HeritageMap({ features, route, routeDefs, boundary, onMa
       const marker = L.marker([lat, lon], {
         icon: buildIcon(feature.properties.category, feature.properties)
       }).bindPopup(buildPopup(feature.properties), { maxWidth: 360 });
+
+      marker.on('click', event => {
+        event.originalEvent?.stopPropagation?.();
+        showAccessRing(map, marker.getLatLng());
+        if (onFeatureSelect) {
+          onFeatureSelect(feature.properties.id);
+        }
+      });
 
       group.addLayer(marker);
       markerByIdRef.current[feature.properties.id] = marker;
@@ -203,7 +250,7 @@ export default function HeritageMap({ features, route, routeDefs, boundary, onMa
     } else {
       map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 13 });
     }
-  }, [boundary, features, route, routeDefs]);
+  }, [boundary, features, onFeatureSelect, route, routeDefs]);
 
   return <div ref={containerRef} className="map-container" />;
 }

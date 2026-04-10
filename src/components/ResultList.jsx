@@ -7,7 +7,7 @@ function hiddenTag(properties) {
   return 'Official plaque';
 }
 
-export default function ResultList({ features, onSelect }) {
+export default function ResultList({ features, onSelect, showCount = true }) {
   const [visibleCount, setVisibleCount] = useState(12);
 
   useEffect(() => {
@@ -34,10 +34,12 @@ export default function ResultList({ features, onSelect }) {
 
   return (
     <div className="results">
-      <div className="result-count">
-        {features.length} place{features.length === 1 ? '' : 's'} match
-        {features.length > visibleCount ? ` · showing first ${visibleCount}` : ''}
-      </div>
+      {showCount ? (
+        <div className="result-count">
+          {features.length} place{features.length === 1 ? '' : 's'} match
+          {features.length > visibleCount ? ` · showing first ${visibleCount}` : ''}
+        </div>
+      ) : null}
       {sortedFeatures.slice(0, visibleCount).map(feature => {
         const properties = feature.properties;
         return (
