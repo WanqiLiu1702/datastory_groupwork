@@ -11,6 +11,66 @@ function matchesHiddenFilter(feature, hidden) {
   return props.hidden_core;
 }
 
+function matchesSearch(props, rawSearch) {
+  const searchText = rawSearch.trim().toLowerCase();
+  if (!searchText) return true;
+
+  return [
+    props.name,
+    props.professions_text,
+    props.borough,
+    props.official_category_text
+  ]
+    .filter(Boolean)
+    .some(value => value.toLowerCase().includes(searchText));
+}
+
+function matchesFilters(feature, filters, ignoredKeys = []) {
+  const ignore = new Set(ignoredKeys);
+  const props = feature.properties;
+  const categoryFilter =
+    filters.category === 'all'
+      ? []
+      : Array.isArray(filters.category)
+        ? filters.category
+        : [filters.category];
+
+  if (!ignore.has('hidden') && !matchesHiddenFilter(feature, filters.hidden)) return false;
+  if (!ignore.has('category') && categoryFilter.length && !categoryFilter.includes(props.category)) return false;
+  if (!ignore.has('context') && filters.context !== 'all' && props.place_context !== filters.context) return false;
+  if (!ignore.has('borough') && filters.borough !== 'all' && props.borough !== filters.borough) return false;
+  if (!ignore.has('route') && filters.route !== 'all' && !(props.routes || []).includes(filters.route)) return false;
+  if (!ignore.has('minEnv') && props.environment_score < filters.minEnv) return false;
+  if (!ignore.has('search') && !matchesSearch(props, filters.search)) return false;
+
+  return true;
+}
+
+function aggregateCounts(features, keyGetter) {
+  const counts = new Map();
+
+  for (const feature of features) {
+    const key = keyGetter(feature);
+    if (!key) continue;
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .map(([key, count]) => ({ key, count }))
+    .sort((a, b) => (b.count - a.count) || a.key.localeCompare(b.key));
+}
+
+function normalizeBoroughName(name = '') {
+  return name
+    .replace(/^London Borough of /i, '')
+    .replace(/^Royal Borough of /i, '')
+    .replace(/^City of /i, '')
+    .replace(/^City and County of the City of /i, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
 export default function App() {
   const [dataset, setDataset] = useState({
     type: 'FeatureCollection',
@@ -19,6 +79,7 @@ export default function App() {
   });
   const [siteContext, setSiteContext] = useState({ features: {} });
   const [boundary, setBoundary] = useState(null);
+  const [boroughBoundaries, setBoroughBoundaries] = useState(null);
   const [filters, setFilters] = useState({
     hidden: 'core',
     category: 'all',
@@ -81,6 +142,13 @@ export default function App() {
       .catch(error => console.error('Failed to load site-context.json', error));
   }, []);
 
+  useEffect(() => {
+    fetch(import.meta.env.BASE_URL + 'london-boroughs.geojson')
+      .then(response => response.json())
+      .then(setBoroughBoundaries)
+      .catch(error => console.error('Failed to load london-boroughs.geojson', error));
+  }, []);
+
   const counts = useMemo(() => {
     const features = dataset.features || [];
     return {
@@ -95,29 +163,7 @@ export default function App() {
   }, [dataset]);
 
   const scopedFeatures = useMemo(() => {
-    return dataset.features.filter(feature => {
-      const props = feature.properties;
-      const searchText = filters.search.trim().toLowerCase();
-      if (!matchesHiddenFilter(feature, filters.hidden)) return false;
-      if (filters.category !== 'all' && props.category !== filters.category) return false;
-      if (filters.context !== 'all' && props.place_context !== filters.context) return false;
-      if (filters.borough !== 'all' && props.borough !== filters.borough) return false;
-      if (props.environment_score < filters.minEnv) return false;
-      if (
-        searchText &&
-        ![
-          props.name,
-          props.professions_text,
-          props.borough,
-          props.official_category_text
-        ]
-          .filter(Boolean)
-          .some(value => value.toLowerCase().includes(searchText))
-      ) {
-        return false;
-      }
-      return true;
-    });
+    return dataset.features.filter(feature => matchesFilters(feature, filters, ['route']));
   }, [dataset, filters]);
 
   const routeCounts = useMemo(() => {
@@ -131,11 +177,22 @@ export default function App() {
   }, [scopedFeatures]);
 
   const visible = useMemo(() => {
-    return scopedFeatures.filter(feature => {
-      if (filters.route === 'all') return true;
-      return (feature.properties.routes || []).includes(filters.route);
-    });
-  }, [scopedFeatures, filters.route]);
+    return dataset.features.filter(feature => matchesFilters(feature, filters));
+  }, [dataset, filters]);
+
+  const boroughRanking = useMemo(() => {
+    return aggregateCounts(
+      dataset.features.filter(feature => matchesFilters(feature, filters, ['borough'])),
+      feature => feature.properties.borough
+    );
+  }, [dataset, filters]);
+
+  const categoryRanking = useMemo(() => {
+    return aggregateCounts(
+      dataset.features.filter(feature => matchesFilters(feature, filters, ['category'])),
+      feature => feature.properties.category
+    );
+  }, [dataset, filters]);
 
   const selectedFeature = useMemo(() => {
     return dataset.features.find(feature => feature.properties.id === selectedFeatureId) || null;
@@ -161,6 +218,8 @@ export default function App() {
         filters={filters}
         setFilters={setFilters}
         boroughOptions={boroughOptions}
+        boroughRanking={boroughRanking}
+        categoryRanking={categoryRanking}
       />
       <div className="map-shell">
         <HeritageMap
@@ -168,8 +227,11 @@ export default function App() {
           route={filters.route}
           routeDefs={dataset.metadata.routes || {}}
           boundary={boundary}
+          boroughBoundaries={boroughBoundaries}
+          activeBorough={normalizeBoroughName(filters.borough)}
           selectedFeature={selectedFeature}
           selectedSiteContext={selectedSiteContext}
+          siteContextById={siteContext.features || {}}
           activeContextLayers={contextLayers}
           onFeatureSelect={handleFeatureSelect}
           onClearSelection={handleClearSelection}
@@ -192,6 +254,23 @@ export default function App() {
           <>
             <div className="context-toolbar">
               <div className="floating-toolbar-label">Context Layers</div>
+              <button
+                type="button"
+                className="context-toggle context-toggle-master"
+                onClick={() =>
+                  setContextLayers(current => {
+                    const shouldEnableAll = !Object.values(current).every(Boolean);
+                    return {
+                      tourism: shouldEnableAll,
+                      green: shouldEnableAll,
+                      water: shouldEnableAll,
+                      roads: shouldEnableAll
+                    };
+                  })
+                }
+              >
+                {Object.values(contextLayers).every(Boolean) ? 'Hide all' : 'Show all'}
+              </button>
               {[
                 ['tourism', 'OSM tourism'],
                 ['green', 'Green space'],

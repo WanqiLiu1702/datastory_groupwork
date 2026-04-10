@@ -28,12 +28,12 @@ export const HIDDEN_DESCRIPTIONS = {
 };
 
 export const CAT_COLORS = {
-  literature: '#8f5d52',
-  science: '#5b7694',
-  arts_music: '#c87457',
-  politics_reform: '#8c7a49',
-  architecture: '#5f826f',
-  exploration: '#5a8690'
+  literature: '#cf6b63',
+  science: '#6d8db3',
+  arts_music: '#db9169',
+  politics_reform: '#b99b57',
+  architecture: '#71957a',
+  exploration: '#5f9ca5'
 };
 
 export const CONTEXT_LABELS = {
@@ -45,9 +45,27 @@ export const CONTEXT_LABELS = {
 };
 
 export const CONTEXT_COLORS = {
-  street_building: '#8c776a',
-  park_edge: '#7d9a6e',
-  waterside: '#6a95a0',
-  civic_frontage: '#ad785b',
-  residential_retreat: '#9183a6'
+  street_building: '#8e7668',
+  park_edge: '#7da270',
+  waterside: '#669aa8',
+  civic_frontage: '#bc8667',
+  residential_retreat: '#9385ab'
+};
+
+export const TOURISM_TYPE_LABELS = {
+  attraction: 'Attraction',
+  artwork: 'Artwork',
+  gallery: 'Gallery',
+  information: 'Information',
+  museum: 'Museum',
+  viewpoint: 'Viewpoint'
+};
+
+export const TOURISM_TYPE_COLORS = {
+  attraction: '#d27c61',
+  artwork: '#b86a7f',
+  gallery: '#8a74b4',
+  information: '#5c90b4',
+  museum: '#8a6f58',
+  viewpoint: '#7a9b6a'
 };

@@ -4,21 +4,72 @@ import {
   CAT_COLORS,
   CAT_LABELS,
   CONTEXT_LABELS,
-  OPENING_LABELS
+  OPENING_LABELS,
+  TOURISM_TYPE_COLORS,
+  TOURISM_TYPE_LABELS
 } from '../constants.js';
+
+function hexToRgba(hex, alpha) {
+  const normalized = hex.replace('#', '');
+  const value = normalized.length === 3
+    ? normalized
+        .split('')
+        .map(char => char + char)
+        .join('')
+    : normalized;
+  const intValue = parseInt(value, 16);
+  const r = (intValue >> 16) & 255;
+  const g = (intValue >> 8) & 255;
+  const b = intValue & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function tourismTypeLabel(type = 'other') {
+  return TOURISM_TYPE_LABELS[type] || type.replace(/_/g, ' ');
+}
+
+function summarizeTourism(items = []) {
+  if (!items.length) return 'None within 500m';
+
+  const counts = new Map();
+  for (const item of items) {
+    const key = item.type || 'other';
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+
+  const summary = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([type, count]) => `${tourismTypeLabel(type)} ${count}`)
+    .join(' · ');
+
+  return `${items.length} nearby · ${summary}`;
+}
+
+function normalizeBoroughName(name = '') {
+  return name
+    .replace(/^London Borough of /i, '')
+    .replace(/^Royal Borough of /i, '')
+    .replace(/^City of /i, '')
+    .replace(/^City and County of the City of /i, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
 
 function buildIcon(category, properties) {
   const color = CAT_COLORS[category] || '#5f826f';
   return L.divIcon({
     className: '',
     html: `
-      <div class="marker-pin ${properties.hidden_quiet ? 'quiet' : ''}" style="background:${color}">
-        <span>${properties.hidden_quiet ? '●' : '♦'}</span>
-      </div>
+      <div
+        class="marker-dot ${properties.hidden_quiet ? 'quiet' : ''}"
+        style="--marker-fill:${hexToRgba(color, 0.42)}; --marker-stroke:${color}; --marker-halo:${hexToRgba(color, 0.18)};"
+      ></div>
     `,
-    iconSize: [28, 28],
-    iconAnchor: [14, 28],
-    popupAnchor: [0, -24]
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    popupAnchor: [0, -10]
   });
 }
 
@@ -30,7 +81,7 @@ function popupLines(lines = []) {
   return lines.map(line => `<span class="badge">${line}</span>`).join(' ');
 }
 
-function buildPopup(properties) {
+function buildPopup(properties, siteContext) {
   const env = '●'.repeat(properties.environment_score) + '○'.repeat(5 - properties.environment_score);
   const hiddenLabel = properties.hidden_quiet ? 'Quiet hidden' : properties.hidden_core ? 'Core hidden' : 'Official plaque';
   const travelTiming =
@@ -41,8 +92,8 @@ function buildPopup(properties) {
     properties.nearest_station && properties.station_distance_m != null
       ? `${properties.nearest_station} (${properties.station_distance_m}m)`
       : 'No nearby TfL station in current dataset';
-  const contextSummary = [
-    `Tourism ${properties.osm_tourism_500m}`,
+  const tourismSummary = summarizeTourism(siteContext?.tourism || []);
+  const landscapeSummary = [
     `Green ${properties.green_space_distance_m ?? 'n/a'}m`,
     `Water ${properties.water_feature_distance_m ?? 'n/a'}m`,
     `Road ${properties.major_road_distance_m ?? 'n/a'}m`
@@ -63,7 +114,8 @@ function buildPopup(properties) {
       <div class="popup-row"><strong>Walk / cycle</strong><span>${travelTiming}</span></div>
       <div class="popup-row"><strong>Travel feel</strong><span>${properties.approach_quality}</span></div>
       <div class="popup-row"><strong>Street access</strong><span>${OPENING_LABELS[properties.opening_status] || properties.opening_status}</span></div>
-      <div class="popup-row"><strong>Context</strong><span>${contextSummary}</span></div>
+      <div class="popup-row"><strong>Tourism nearby</strong><span>${tourismSummary}</span></div>
+      <div class="popup-row"><strong>Landscape</strong><span>${landscapeSummary}</span></div>
       ${properties.station_lines?.length ? `<div class="popup-section"><strong>TfL lines</strong><div class="badge-wrap">${popupLines(properties.station_lines)}</div></div>` : ''}
       <div class="popup-section">
         <a class="popup-link" href="${properties.path}" target="_blank" rel="noreferrer">Open official English Heritage page</a>
@@ -112,8 +164,11 @@ export default function HeritageMap({
   route,
   routeDefs,
   boundary,
+  boroughBoundaries,
+  activeBorough,
   selectedFeature,
   selectedSiteContext,
+  siteContextById,
   activeContextLayers,
   onMapReady,
   onFeatureSelect,
@@ -124,9 +179,15 @@ export default function HeritageMap({
   const layerRef = useRef(null);
   const lineRef = useRef(null);
   const boundaryRef = useRef(null);
+  const boroughRef = useRef(null);
   const accessRingRef = useRef(null);
   const contextLayerRef = useRef(null);
   const markerByIdRef = useRef({});
+  const siteContextRef = useRef(siteContextById);
+
+  useEffect(() => {
+    siteContextRef.current = siteContextById;
+  }, [siteContextById]);
 
   function clearAccessRing(map) {
     if (accessRingRef.current) {
@@ -195,13 +256,17 @@ export default function HeritageMap({
 
     if (toggles.tourism) {
       for (const item of context.tourism || []) {
+        const color = TOURISM_TYPE_COLORS[item.type] || '#c5846e';
         const marker = L.circleMarker([item.lat, item.lon], {
-          radius: 5,
-          color: '#9e6d5a',
-          weight: 1,
-          fillColor: '#c98a72',
-          fillOpacity: 0.9
-        }).bindTooltip(`${item.label} · ${item.distance_m}m`, { direction: 'top', offset: [0, -4] });
+          radius: 6,
+          color,
+          weight: 1.5,
+          fillColor: color,
+          fillOpacity: 0.3
+        }).bindTooltip(`${tourismTypeLabel(item.type)} · ${item.label} · ${item.distance_m}m`, {
+          direction: 'top',
+          offset: [0, -4]
+        });
         group.addLayer(marker);
       }
     }
@@ -325,6 +390,27 @@ export default function HeritageMap({
     const map = mapRef.current;
     if (!map) return;
 
+    if (boroughRef.current) {
+      map.removeLayer(boroughRef.current);
+      boroughRef.current = null;
+    }
+
+    if (boroughBoundaries) {
+      boroughRef.current = L.geoJSON(boroughBoundaries, {
+        style: feature => {
+          const isActive = activeBorough && normalizeBoroughName(feature?.properties?.name || '') === activeBorough;
+          return {
+            color: isActive ? '#355f5b' : '#7b7369',
+            weight: isActive ? 2.4 : 1,
+            opacity: isActive ? 0.85 : 0.34,
+            fillOpacity: 0,
+            dashArray: isActive ? null : '3 6'
+          };
+        },
+        interactive: false
+      }).addTo(map);
+    }
+
     if (boundaryRef.current) {
       map.removeLayer(boundaryRef.current);
       boundaryRef.current = null;
@@ -368,10 +454,11 @@ export default function HeritageMap({
       const [lon, lat] = feature.geometry.coordinates;
       const marker = L.marker([lat, lon], {
         icon: buildIcon(feature.properties.category, feature.properties)
-      }).bindPopup(buildPopup(feature.properties), { maxWidth: 360 });
+      }).bindPopup(buildPopup(feature.properties, siteContextRef.current?.[feature.properties.id]), { maxWidth: 360 });
 
       marker.on('click', event => {
         event.originalEvent?.stopPropagation?.();
+        marker.setPopupContent(buildPopup(feature.properties, siteContextRef.current?.[feature.properties.id]));
         showAccessRing(map, marker.getLatLng());
         if (onFeatureSelect) {
           onFeatureSelect(feature.properties.id);
@@ -396,7 +483,7 @@ export default function HeritageMap({
     } else {
       map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 13 });
     }
-  }, [boundary, features, onFeatureSelect, route, routeDefs]);
+  }, [activeBorough, boroughBoundaries, boundary, features, onFeatureSelect, route, routeDefs]);
 
   useEffect(() => {
     const map = mapRef.current;

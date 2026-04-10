@@ -1,4 +1,5 @@
 import React from 'react';
+import RankingPanel from './RankingPanel.jsx';
 import {
   CAT_COLORS,
   CAT_LABELS,
@@ -12,14 +13,44 @@ export default function Sidebar({
   counts,
   filters,
   setFilters,
-  boroughOptions
+  boroughOptions,
+  boroughRanking,
+  categoryRanking
 }) {
   const setHidden = value => setFilters(current => ({ ...current, hidden: value, route: 'all' }));
-  const setType = value => setFilters(current => ({ ...current, category: value }));
+  const setType = value =>
+    setFilters(current => {
+      if (value === 'all') {
+        return { ...current, category: 'all' };
+      }
+
+      const currentValues =
+        current.category === 'all'
+          ? []
+          : Array.isArray(current.category)
+            ? current.category
+            : [current.category];
+      const nextValues = currentValues.includes(value)
+        ? currentValues.filter(item => item !== value)
+        : [...currentValues, value];
+
+      return {
+        ...current,
+        category: nextValues.length ? nextValues : 'all'
+      };
+    });
   const setContext = value => setFilters(current => ({ ...current, context: value }));
   const setBorough = value => setFilters(current => ({ ...current, borough: value }));
   const setMinEnv = value => setFilters(current => ({ ...current, minEnv: value }));
   const setSearch = value => setFilters(current => ({ ...current, search: value }));
+
+  const isThemeActive = value => {
+    if (value === 'all') return filters.category === 'all';
+    if (filters.category === 'all') return false;
+    return Array.isArray(filters.category)
+      ? filters.category.includes(value)
+      : filters.category === value;
+  };
 
   const Chip = ({ value, label, current, onClick, swatch }) => (
     <span
@@ -63,6 +94,15 @@ export default function Sidebar({
         <p className="panel-note">{HIDDEN_DESCRIPTIONS[filters.hidden]}</p>
       </div>
 
+      <RankingPanel
+        boroughRanking={boroughRanking}
+        categoryRanking={categoryRanking}
+        currentBorough={filters.borough}
+        currentCategory={filters.category}
+        onSelectBorough={setBorough}
+        onSelectCategory={setType}
+      />
+
       <div className="panel">
         <h2>Search</h2>
         <input
@@ -77,18 +117,24 @@ export default function Sidebar({
       <div className="panel">
         <h2>Theme</h2>
         <div className="chip-row">
-          <Chip value="all" label="All" current={filters.category} onClick={setType} />
-          {Object.entries(CAT_LABELS).map(([key, label]) => (
-            <Chip
-              key={key}
-              value={key}
-              label={label}
-              current={filters.category}
-              onClick={setType}
-              swatch={CAT_COLORS[key]}
-            />
-          ))}
+          <span className={'chip' + (isThemeActive('all') ? ' active' : '')} onClick={() => setType('all')}>
+            All
+          </span>
+          {Object.entries(CAT_LABELS).map(([key, label]) => {
+            const active = isThemeActive(key);
+            return (
+              <span
+                key={key}
+                className={'chip' + (active ? ' active' : '')}
+                onClick={() => setType(key)}
+              >
+                {label}
+                <span className="chip-swatch" style={{ background: CAT_COLORS[key] }} />
+              </span>
+            );
+          })}
         </div>
+        <p className="panel-note">Select one or more heritage themes.</p>
       </div>
 
       <div className="panel">
