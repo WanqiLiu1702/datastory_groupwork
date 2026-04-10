@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import ResultList from './ResultList.jsx';
 import { CAT_LABELS, ROUTE_COLORS } from '../constants.js';
 
@@ -43,6 +43,22 @@ function topCounts(items, accessor, limit = 3) {
     .map(([label, count]) => ({ label, count }));
 }
 
+function topArrayCounts(items, accessor, limit = 5) {
+  const counts = new Map();
+  for (const item of items) {
+    const values = accessor(item) || [];
+    for (const value of values) {
+      if (!value) continue;
+      counts.set(value, (counts.get(value) || 0) + 1);
+    }
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([label, count]) => ({ label, count }));
+}
+
 export default function ExplorerPanels({
   activePanel,
   setActivePanel,
@@ -54,10 +70,21 @@ export default function ExplorerPanels({
   onSetRoute,
   onSelectFeature
 }) {
+  const [stepIndex, setStepIndex] = useState(0);
+  const [routeAudience, setRouteAudience] = useState('all');
   const routeEntries = Object.entries(routeDefs);
   const availableRouteCount = useMemo(() => {
     return Object.keys(routeCounts).length || routeEntries.length;
   }, [routeCounts, routeEntries.length]);
+  const audienceOptions = useMemo(() => {
+    const values = new Set();
+    for (const route of Object.values(routeDefs)) {
+      for (const audience of route.recommended_for || []) {
+        values.add(audience);
+      }
+    }
+    return ['all', ...[...values].sort()];
+  }, [routeDefs]);
 
   const routeDetails = useMemo(() => {
     return Object.fromEntries(
@@ -79,19 +106,26 @@ export default function ExplorerPanels({
             quietCount: features.filter(feature => feature.properties.hidden_quiet).length,
             boroughs: topCounts(features, feature => feature.properties.borough),
             themes: topCounts(features, feature => CAT_LABELS[feature.properties.category] || feature.properties.category),
+            stations: topCounts(features, feature => feature.properties.nearest_station, 4),
+            lines: topArrayCounts(features, feature => feature.properties.station_lines, 5),
             avgWalk,
             stops: ordered.slice(0, 6).map(feature => ({
               id: feature.properties.id,
               name: feature.properties.name,
               borough: feature.properties.borough,
               quiet: feature.properties.hidden_quiet,
-              walk: feature.properties.walk_minutes_from_station
+              walk: feature.properties.walk_minutes_from_station,
+              station: feature.properties.nearest_station
             }))
           }
         ];
       })
     );
   }, [routeEntries, routeSourceFeatures]);
+
+  useEffect(() => {
+    setStepIndex(0);
+  }, [activeRoute]);
 
   const togglePanel = panel => {
     setActivePanel(current => (current === panel ? null : panel));
@@ -100,6 +134,22 @@ export default function ExplorerPanels({
   const selectRoute = routeKey => {
     onSetRoute(routeKey);
     setActivePanel('routes');
+    setStepIndex(0);
+  };
+
+  const filteredRouteEntries = useMemo(() => {
+    if (routeAudience === 'all') return routeEntries;
+    return routeEntries.filter(([, route]) => (route.recommended_for || []).includes(routeAudience));
+  }, [routeAudience, routeEntries]);
+
+  const currentRoute = activeRoute !== 'all' ? routeDetails[activeRoute] : null;
+  const currentStep = currentRoute?.stops?.[Math.min(stepIndex, Math.max(currentRoute.stops.length - 1, 0))] || null;
+
+  const jumpToStep = nextIndex => {
+    if (!currentRoute?.stops?.length) return;
+    const clamped = Math.max(0, Math.min(nextIndex, currentRoute.stops.length - 1));
+    setStepIndex(clamped);
+    onSelectFeature(currentRoute.stops[clamped].id);
   };
 
   return (
@@ -165,7 +215,20 @@ export default function ExplorerPanels({
                     </div>
                   </div>
 
-                  {routeEntries.map(([key, route]) => (
+                  <div className="route-audience-row">
+                    {audienceOptions.map(option => (
+                      <button
+                        key={option}
+                        type="button"
+                        className={'route-audience-chip' + (routeAudience === option ? ' active' : '')}
+                        onClick={() => setRouteAudience(option)}
+                      >
+                        {option === 'all' ? 'All audiences' : option}
+                      </button>
+                    ))}
+                  </div>
+
+                  {filteredRouteEntries.map(([key, route]) => (
                     <div
                       key={key}
                       className={'route route-card-large' + (activeRoute === key ? ' active' : '')}
@@ -182,6 +245,9 @@ export default function ExplorerPanels({
                         <span>{route.focus}</span>
                         {routeDetails[key]?.quietCount ? <span>{routeDetails[key].quietCount} quiet hidden</span> : null}
                         {routeDetails[key]?.boroughs?.length ? <span>{routeDetails[key].boroughs.length} boroughs</span> : null}
+                        {(route.recommended_for || []).slice(0, 2).map(item => (
+                          <span key={item}>{item}</span>
+                        ))}
                       </div>
                     </div>
                   ))}
@@ -214,6 +280,30 @@ export default function ExplorerPanels({
                       </div>
 
                       <div className="route-detail-section">
+                        <div className="route-detail-label">Best for</div>
+                        <div className="badge-wrap">
+                          {(routeDetails[activeRoute].recommended_for || []).map(item => (
+                            <span key={item} className="badge badge-audience">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="route-detail-section">
+                        <div className="route-detail-label">Why recommended</div>
+                        <p className="route-detail-text">{routeDetails[activeRoute].why || routeDetails[activeRoute].focus}</p>
+                      </div>
+
+                      <div className="route-detail-section">
+                        <div className="route-detail-label">How it was selected</div>
+                        <p className="route-detail-text">
+                          {routeDetails[activeRoute].selection ||
+                            'This curated route is a subset of plaques chosen for shared hidden characteristics, theme and access patterns.'}
+                        </p>
+                      </div>
+
+                      <div className="route-detail-section">
                         <div className="route-detail-label">Borough coverage</div>
                         <div className="badge-wrap">
                           {routeDetails[activeRoute].boroughs.map(item => (
@@ -236,6 +326,58 @@ export default function ExplorerPanels({
                       </div>
 
                       <div className="route-detail-section">
+                        <div className="route-detail-label">Nearby TfL access</div>
+                        <div className="badge-wrap">
+                          {routeDetails[activeRoute].stations.map(item => (
+                            <span key={item.label} className="badge">
+                              {item.label} {item.count}
+                            </span>
+                          ))}
+                          {routeDetails[activeRoute].lines.map(item => (
+                            <span key={item.label} className="badge badge-soft">
+                              {item.label} {item.count}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="route-detail-section">
+                        <div className="route-detail-label">Step-by-step explorer</div>
+                        <p className="route-detail-text">
+                          Move through the route one stop at a time and refocus the map sequentially instead of jumping around manually.
+                        </p>
+                        {currentStep ? (
+                          <div className="route-stepper">
+                            <div className="route-stepper-head">
+                              <span className="route-stepper-pill">
+                                Step {Math.min(stepIndex + 1, routeDetails[activeRoute].stops.length)} / {routeDetails[activeRoute].stops.length}
+                              </span>
+                              <div className="route-stepper-actions">
+                                <button type="button" onClick={() => jumpToStep(stepIndex - 1)} disabled={stepIndex === 0}>
+                                  Previous
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => jumpToStep(stepIndex + 1)}
+                                  disabled={stepIndex >= routeDetails[activeRoute].stops.length - 1}
+                                >
+                                  Next
+                                </button>
+                              </div>
+                            </div>
+                            <div className="route-stepper-card">
+                              <strong>{currentStep.name}</strong>
+                              <span>
+                                {currentStep.borough}
+                                {currentStep.station ? ` · ${currentStep.station}` : ''}
+                                {Number.isFinite(currentStep.walk) ? ` · ${currentStep.walk} min walk from TfL` : ''}
+                              </span>
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+
+                      <div className="route-detail-section">
                         <div className="route-detail-label">Preview stops</div>
                         <div className="route-stop-list">
                           {routeDetails[activeRoute].stops.map((stop, index) => (
@@ -243,13 +385,14 @@ export default function ExplorerPanels({
                               key={stop.id}
                               type="button"
                               className="route-stop"
-                              onClick={() => onSelectFeature(stop.id)}
+                              onClick={() => jumpToStep(index)}
                             >
                               <span className="route-stop-index">{index + 1}</span>
                               <span className="route-stop-copy">
                                 <strong>{stop.name}</strong>
                                 <span>
                                   {stop.borough}
+                                  {stop.station ? ` · ${stop.station}` : ''}
                                   {Number.isFinite(stop.walk) ? ` · ${stop.walk} min walk from TfL` : ''}
                                   {stop.quiet ? ' · quiet hidden' : ''}
                                 </span>

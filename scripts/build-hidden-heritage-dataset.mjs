@@ -38,56 +38,120 @@ const ROUTE_DEFS = {
     description: 'Writers, artists and thinkers in Camden and Westminster away from the main tourist trail.',
     color: '#77805a',
     duration: '60-75 min walk',
-    focus: 'Literary and scientific central London'
+    focus: 'Literary and scientific central London',
+    why: 'Best when you want a compact central walk that still feels quieter than the usual museum-and-monument circuit.',
+    selection: 'Chosen from core-hidden plaques in Camden and Westminster with literature, science or arts themes.',
+    recommended_for: ['Experienced London Visitor', 'Community Heritage Advocate']
   },
   west_london_creatives: {
     label: 'West London Creatives',
     description: 'Overlooked arts and design plaques across Chelsea, Kensington and riverside streets.',
     color: '#b06f57',
     duration: '70-90 min walk',
-    focus: 'Arts, music and architecture'
+    focus: 'Arts, music and architecture',
+    why: 'Best for visitors who want a more design-led route with stronger neighbourhood character and fewer headline landmarks.',
+    selection: 'Chosen from core-hidden arts and architecture plaques across west and inner-west London boroughs.',
+    recommended_for: ['Experienced London Visitor']
   },
   civic_voices: {
     label: 'Civic Voices',
     description: 'Politicians, campaigners and scientists whose plaques sit in accessible but overlooked neighbourhoods.',
     color: '#5b7a93',
     duration: '45-60 min walk',
-    focus: 'Politics, reform and public life'
+    focus: 'Politics, reform and public life',
+    why: 'Works well if the user wants stories of public life, reform and citizenship rather than celebrity homes.',
+    selection: 'Chosen from core-hidden politics and science plaques in inner boroughs with solid TfL access.',
+    recommended_for: ['Community Heritage Advocate', 'Experienced London Visitor']
   },
   garden_suburb_retreats: {
     label: 'Garden Suburb Retreats',
     description: 'Quieter residential plaques near parks and side streets across outer London.',
     color: '#8979a0',
     duration: '75-105 min walk',
-    focus: 'Residential calm and green edges'
+    focus: 'Residential calm and green edges',
+    why: 'Good for users prioritising lower visitor pressure, greener surroundings and a calmer edge-of-city feel.',
+    selection: 'Chosen from core-hidden plaques in outer boroughs where quieter residential patterns are more common.',
+    recommended_for: ['Quiet Cultural Seeker', 'Experienced London Visitor']
   },
   literary_lives_walk: {
     label: 'Literary Lives Walk',
     description: 'Novelists, poets and editors clustered into a tighter route for visitors who want a theme-led walk.',
     color: '#9a685d',
     duration: '50-70 min walk',
-    focus: 'Literature'
+    focus: 'Literature',
+    why: 'Recommended for a single-theme walk where the user wants a strong narrative thread from stop to stop.',
+    selection: 'Chosen from literature plaques with hidden-core status across central and inner-west London.',
+    recommended_for: ['Experienced London Visitor']
   },
   riverside_quiet_edge: {
     label: 'Riverside Quiet Edge',
     description: 'Plaques close to river or canal settings where cultural memory meets calmer waterfront detours.',
     color: '#5f9099',
     duration: '55-75 min walk',
-    focus: 'Water-adjacent hidden heritage'
+    focus: 'Water-adjacent hidden heritage',
+    why: 'Useful for users who explicitly want culture plus a softer waterside atmosphere.',
+    selection: 'Chosen from hidden-core plaques within 350m of mapped water features and with stronger environment scores.',
+    recommended_for: ['Quiet Cultural Seeker']
   },
   parkside_pause: {
     label: 'Parkside Pause',
     description: 'Shorter quiet-hidden route favouring plaques near parks, commons and greener side streets.',
     color: '#7b9a68',
     duration: '35-50 min walk',
-    focus: 'Green and quiet places'
+    focus: 'Green and quiet places',
+    why: 'Recommended when the aim is a shorter, lower-stress walk close to greenery.',
+    selection: 'Chosen from quiet-hidden plaques close to green space, favouring calmer park-edge contexts.',
+    recommended_for: ['Quiet Cultural Seeker']
   },
   step_free_starter: {
     label: 'Step-Free Starter',
     description: 'A more accessible starter route using plaques near lift-served TfL stations and shorter walks.',
     color: '#5e6b81',
     duration: '30-45 min walk',
-    focus: 'Shorter approach and easier station access'
+    focus: 'Shorter approach and easier station access',
+    why: 'Useful as an easier entry route where access and simpler station approaches matter more than route length.',
+    selection: 'Chosen from core-hidden plaques near lift-served stations with shorter walking distances.',
+    recommended_for: ['Quiet Cultural Seeker', 'Experienced London Visitor']
+  },
+  science_invention_loop: {
+    label: 'Science & Invention Loop',
+    description: 'Doctors, inventors and experimenters gathered into a more theme-led hidden-heritage route.',
+    color: '#83a6cf',
+    duration: '45-65 min walk',
+    focus: 'Science and innovation',
+    why: 'Recommended for users who want a tighter knowledge-and-discovery theme rather than a mixed cultural walk.',
+    selection: 'Chosen from hidden-core science plaques with good TfL access in central and inner London.',
+    recommended_for: ['Experienced London Visitor', 'Community Heritage Advocate']
+  },
+  campaigns_and_reform: {
+    label: 'Campaigns & Reform',
+    description: 'Campaigners, civic thinkers and reformers linked through accessible but less-promoted London streets.',
+    color: '#d48c77',
+    duration: '45-65 min walk',
+    focus: 'Politics and reform',
+    why: 'Works well when the user wants places tied to protest, policy, reform or civic change.',
+    selection: 'Chosen from hidden-core politics and reform plaques with low tourism pressure and walkable stations.',
+    recommended_for: ['Community Heritage Advocate', 'Experienced London Visitor']
+  },
+  music_performance_circuit: {
+    label: 'Music & Performance Circuit',
+    description: 'Performers, composers and cultural figures across inner-west and central London.',
+    color: '#e3a77e',
+    duration: '50-70 min walk',
+    focus: 'Arts and performance',
+    why: 'Recommended for a more lively creative-history route that still avoids the most overexposed visitor hotspots.',
+    selection: 'Chosen from hidden-core arts and music plaques in borough clusters with walkable TfL access.',
+    recommended_for: ['Experienced London Visitor']
+  },
+  outer_london_pioneers: {
+    label: 'Outer London Pioneers',
+    description: 'A broader route of writers, scientists and explorers in less central borough settings.',
+    color: '#94bd8d',
+    duration: '70-95 min walk',
+    focus: 'Outer-London discovery',
+    why: 'Good when the user wants to see how hidden heritage extends beyond the familiar central borough core.',
+    selection: 'Chosen from hidden-core plaques in outer boroughs with literature, science or exploration themes.',
+    recommended_for: ['Experienced London Visitor', 'Community Heritage Advocate']
   }
 };
 
@@ -587,6 +651,44 @@ function assignRoutes(properties) {
     properties.station_distance_m <= 650
   ) {
     routes.push('step_free_starter');
+  }
+
+  if (
+    properties.hidden_core &&
+    properties.category === 'science' &&
+    properties.station_distance_m != null &&
+    properties.station_distance_m <= 700 &&
+    /Camden|Westminster|Islington|Southwark|Kensington|Chelsea|Hammersmith|Wandsworth|Hackney/i.test(borough)
+  ) {
+    routes.push('science_invention_loop');
+  }
+
+  if (
+    properties.hidden_core &&
+    properties.category === 'politics_reform' &&
+    properties.station_distance_m != null &&
+    properties.station_distance_m <= 700 &&
+    properties.osm_tourism_500m <= 2
+  ) {
+    routes.push('campaigns_and_reform');
+  }
+
+  if (
+    properties.hidden_core &&
+    properties.category === 'arts_music' &&
+    properties.station_distance_m != null &&
+    properties.station_distance_m <= 700 &&
+    /Westminster|Kensington|Chelsea|Hammersmith|Camden|Islington|Lambeth|Wandsworth/i.test(borough)
+  ) {
+    routes.push('music_performance_circuit');
+  }
+
+  if (
+    properties.hidden_core &&
+    ['literature', 'science', 'exploration'].includes(properties.category) &&
+    /Barnet|Harrow|Enfield|Redbridge|Waltham Forest|Croydon|Lewisham|Hounslow|Merton|Brent|Ealing|Sutton|Bromley|Greenwich|Richmond/i.test(borough)
+  ) {
+    routes.push('outer_london_pioneers');
   }
 
   return routes;
