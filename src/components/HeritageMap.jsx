@@ -513,7 +513,7 @@ export default function HeritageMap({
 
       if (routeLatLngs.length >= 2) {
         try {
-          lineRef.current = L.layerGroup();
+          lineRef.current = L.featureGroup();
           L.polyline(routeLatLngs, {
             color: 'rgba(255,255,255,0.92)',
             weight: 10,
